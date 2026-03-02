@@ -1,0 +1,55 @@
+## Interface: 30300
+## Title: BasicUI
+## Notes: SiDuB's Basic User Interface 
+## Author: SiDuB
+## Version: 3.3.5
+## SavedVariables: BasicDB
+
+#============================================================
+# CORE
+#============================================================
+BasicUI.lua
+
+#============================================================
+# MODULES (Fonts must load immediately after Core)
+#============================================================
+Modules\Fonts.lua
+Modules\ActionBars.lua
+Modules\Buffs.lua
+Modules\Chat.lua
+Modules\Tooltip.lua
+Modules\TrackerFrame.lua
+Modules\Unitframes.lua
+
+#============================================================
+# Datapanel Module
+#============================================================
+Modules\Datapanel\Datapanel.lua
+
+# ------------------
+# Datapanel Plugins
+# ------------------
+Modules\Datapanel\Plugins\BagSpace.lua
+Modules\Datapanel\Plugins\Durability.lua
+Modules\Datapanel\Plugins\Friends.lua
+Modules\Datapanel\Plugins\Guild.lua
+Modules\Datapanel\Plugins\Spec.lua
+Modules\Datapanel\Plugins\Professions.lua
+Modules\Datapanel\Plugins\Performance.lua
+Modules\Datapanel\Plugins\MainStats.lua
+
+#============================================================
+# QoL Module
+#============================================================
+Modules\QoL\QoL.lua
+
+# ------------------
+# QoL Sub Modules
+# ------------------
+Modules\QoL\Automation.lua
+Modules\QoL\AutoGreed.lua
+Modules\QoL\AltBuy.lua
+Modules\QoL\DoubleTradeSkill.lua
+Modules\QoL\MapCoords.lua
+Modules\QoL\Minimap.lua
+Modules\QoL\ZoneText.lua
