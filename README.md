@@ -1,3 +1,5 @@
+![My Screenshot](Screenshots/BasicUI%20Main%20Screenshot.jpg)
+
 # BasicUI – Ascension Reborn
 
 A lightweight, modular interface enhancement designed specifically for Ascension Reborn.
