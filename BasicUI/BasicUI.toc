@@ -18,7 +18,6 @@ Modules\ActionBars.lua
 Modules\Buffs.lua
 Modules\Chat.lua
 Modules\Tooltip.lua
-Modules\TrackerFrame.lua
 Modules\Unitframes.lua
 
 #============================================================

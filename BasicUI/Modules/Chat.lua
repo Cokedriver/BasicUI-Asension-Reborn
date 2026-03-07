@@ -8,7 +8,6 @@ local M = {}
 -- CONFIG DEFAULTS
 --============================================================
 M.defaults = {
-    editBoxAlpha = 1,
     hideButtons  = false,
     fullMovement = false,
 }
@@ -21,7 +20,7 @@ local select = select
 local gsub   = string.gsub
 local _G     = _G
 
-local FULL_MOVEMENT = false
+local fullMovement = false
 
 -- Use 0.01 instead of 0 to prevent math errors in Blizzard's FCF_FadeOutChatFrame
 CHAT_FRAME_TAB_SELECTED_MOUSEOVER_ALPHA = 1
@@ -303,7 +302,7 @@ local function ModChatFrame(chatName)
     local chat = _G[chatName]
     if not chat then return end
 
-    if FULL_MOVEMENT then
+    if fullMovement then
         chat:SetClampedToScreen(false)
         chat:SetClampRectInsets(0, 0, 0, 0)
         chat:SetMaxResize(UIParent:GetWidth(), UIParent:GetHeight())
@@ -324,58 +323,6 @@ function M:ApplyChatStyle()
         if chat and not chat.BasicUI_hasModification then
             ModChatFrame(chat:GetName())
             chat.BasicUI_hasModification = true
-        end
-    end
-end
-
---============================================================
--- EXTRA WINDOWS
---============================================================
-function M:SetupExtraWindows()
-    -- Whisper window
-    local whisperIndex = EnsureChatWindow("Whisper")
-    local whisperFrame = _G["ChatFrame"..whisperIndex]
-
-    if whisperFrame then
-        ChatFrame_RemoveAllMessageGroups(whisperFrame)
-        ChatFrame_RemoveAllChannels(whisperFrame)
-
-        ChatFrame_AddMessageGroup(whisperFrame, "WHISPER")
-        ChatFrame_AddMessageGroup(whisperFrame, "WHISPER_INFORM")
-        ChatFrame_AddMessageGroup(whisperFrame, "BN_WHISPER")
-        ChatFrame_AddMessageGroup(whisperFrame, "BN_WHISPER_INFORM")
-        ChatFrame_AddMessageGroup(whisperFrame, "AFK")
-        ChatFrame_AddMessageGroup(whisperFrame, "DND")
-    end
-
-    -- Trade / Spam window
-    local tradeIndex = EnsureChatWindow("Trade")
-    local tradeFrame = _G["ChatFrame"..tradeIndex]
-
-    if tradeFrame then
-        ChatFrame_RemoveAllMessageGroups(tradeFrame)
-        ChatFrame_RemoveAllChannels(tradeFrame)
-
-        ChatFrame_AddMessageGroup(tradeFrame, "SYSTEM")
-
-        JoinChannelByName("Ascension")
-        JoinChannelByName("Newcomers")
-        JoinChannelByName("Trade")
-        JoinChannelByName("LFG")
-        JoinChannelByName("Guild")
-
-        ChatFrame_AddChannel(tradeFrame, "Ascension")
-        ChatFrame_AddChannel(tradeFrame, "Newcomers")
-        ChatFrame_AddChannel(tradeFrame, "Trade")
-        ChatFrame_AddChannel(tradeFrame, "LFG")
-        ChatFrame_AddChannel(tradeFrame, "Guild")
-
-        if ChatFrame1 then
-            ChatFrame_RemoveChannel(ChatFrame1, "Ascension")
-            ChatFrame_RemoveChannel(ChatFrame1, "Newcomers")
-            ChatFrame_RemoveChannel(ChatFrame1, "Trade")
-            ChatFrame_RemoveChannel(ChatFrame1, "LFG")
-            ChatFrame_RemoveChannel(ChatFrame1, "Guild")
         end
     end
 end
@@ -422,7 +369,6 @@ function M:OnLoadScreen()
         end
     end
 
-    self:SetupExtraWindows()
     StylePrimaryEditBox()
     self:ApplyChatStyle()
     self:EnableItemLinkTooltip()
