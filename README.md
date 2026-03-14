@@ -1,4 +1,4 @@
-![My Screenshot](Screenshots/BasicUI%20Main%20Screenshot.jpg)
+![My Screenshot](BasicUI/Screenshots/BasicUI%20Main%20Screenshot.jpg)
 
 # BasicUI – Ascension Reborn
 
