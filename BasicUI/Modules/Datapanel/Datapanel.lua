@@ -172,8 +172,30 @@ function M:OnEnable()
         end
     end
 
-    self:UpdatePanel()
-    self:StartRefreshEngine()
+	self:UpdatePanel()
+	self:StartRefreshEngine()
+
+	GameTooltip:HookScript("OnEnter", function(self)
+		if self == GameTooltip then
+			GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+		end
+	end)
+
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+		if self.db.enabled then
+			C_Timer.After(0.1, function()
+				self:DockMainMenuBar()
+			end)
+		end
+	end)
+
+	hooksecurefunc("UIParent_ManageFramePositions", function()
+		if M.db and M.db.enabled then
+			M:DockMainMenuBar()
+		end
+	end)
+
+	
 
 end
 

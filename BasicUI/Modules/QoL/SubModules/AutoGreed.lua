@@ -40,6 +40,24 @@ BasicUI_QoL_RegisterModule("AutoGreed", {
     -- UPGRADE CHECK
     ----------------------------------------------------------
 
+    GetILvl = function(link)
+
+        if not link then return 0 end
+
+        local t = type(link)
+        if t ~= "string" and t ~= "number" then
+            return 0
+        end
+
+        if GetDetailedItemLevelInfo then
+            return GetDetailedItemLevelInfo(link) or 0
+        end
+
+        local _, _, _, ilvl = GetItemInfo(link)
+        return ilvl or 0
+
+    end,
+
     IsUpgrade = function(self, link)
 
         local _, _, _, itemLevel, _, _, _, _, equipLoc = GetItemInfo(link)
@@ -49,7 +67,7 @@ BasicUI_QoL_RegisterModule("AutoGreed", {
         if not slots then return false end
 
         local playerLevel = UnitLevel("player")
-        local newILvl = GetDetailedItemLevelInfo(link) or itemLevel or 0
+        local newILvl = self:GetILvl(link) or itemLevel or 0
 
         local lowestEquipped = math.huge
 
@@ -69,7 +87,7 @@ BasicUI_QoL_RegisterModule("AutoGreed", {
                 return false
             end
 
-            local equippedILvl = GetDetailedItemLevelInfo(equippedLink) or 0
+            local equippedILvl = self:GetILvl(equippedLink)
 
             if equippedILvl < lowestEquipped then
                 lowestEquipped = equippedILvl
