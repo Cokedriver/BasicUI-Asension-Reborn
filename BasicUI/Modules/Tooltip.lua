@@ -1,17 +1,38 @@
 --============================================================
 -- MODULE: Tooltip
 --============================================================
+local addonName, BasicUI = ...
 local MODULE_NAME = "Tooltip"
 local M = {}
 
-local function DB()
-    return M.db or M.defaults
-end
+local db
+
+local TOOLTIP_FRAMES = {
+    GameTooltip,
+    ItemRefTooltip,
+    ShoppingTooltip1,
+    ShoppingTooltip2,
+    ShoppingTooltip3,
+    WorldMapTooltip,
+    DropDownList1MenuBackdrop,
+    DropDownList2MenuBackdrop,
+    ConsolidatedBuffsTooltip,
+    ChatMenu,
+    EmoteMenu,
+    LanguageMenu,
+    VoiceMacroMenu,
+    FriendsTooltip,
+    PetBuffTooltip,
+    PlayerBuffTooltip,
+}
 
 --============================================================
 -- SECTION 1: Defaults (cfg → M.defaults)
 --============================================================
 M.defaults = {
+    enabled = true,
+
+	font = BasicUI:GetBasicFont("N"),
     fontSize = 15,
     fontOutline = false,
 
@@ -36,7 +57,7 @@ M.defaults = {
         healthFullFormat = '$cur',
 
         fontSize = 13,
-        font = "Fonts\\FRIZQT__.ttf",
+        font = BasicUI:GetBasicFont("N"),
         showOutline = true,
         textPos = 'CENTER',
 
@@ -57,7 +78,7 @@ M.defaults = {
 CUSTOM_FACTION_BAR_COLORS = {
     [1] = {r = 1, g = 0, b = 0},
     [2] = {r = 1, g = 0, b = 0},
-    [3] = {r = 1, g = 0, b = 0}, -- Changed to Red for hostile
+    [3] = {r = 1, g = 0, b = 0},
     [4] = {r = 1, g = 1, b = 0},
     [5] = {r = 0, g = 1, b = 0},
     [6] = {r = 0, g = 1, b = 0},
@@ -66,99 +87,40 @@ CUSTOM_FACTION_BAR_COLORS = {
 }
 
 function GameTooltip_UnitColor(unit)
-    local r, g, b
-
-    if UnitIsUnit(unit, "pet") then
-        r, g, b = 157/255, 197/255, 255/255
-
-    elseif UnitIsDead(unit) or UnitIsGhost(unit) then
-        r, g, b = 0.5, 0.5, 0.5
-
-    elseif UnitIsPlayer(unit) then
-        if UnitIsFriend(unit, 'player') then
-            local _, class = UnitClass(unit)
-            if class then
-                r = RAID_CLASS_COLORS[class].r
-                g = RAID_CLASS_COLORS[class].g
-                b = RAID_CLASS_COLORS[class].b
-            else
-                r, g, b = 0.60, 0.60, 0.60
-            end
-        else
-            r, g, b = 1, 0, 0
-        end
-
-    else
-        -- Logic for NPCs: Check combat/threat first to turn Neutral -> Red
-        local reaction = UnitReaction(unit, 'player')
-        
-        if (UnitAffectingCombat(unit) or UnitThreatSituation("player", unit)) and UnitCanAttack("player", unit) then
-            r, g, b = 1, 0, 0 -- Red if Engaged
-        elseif reaction and CUSTOM_FACTION_BAR_COLORS[reaction] then
-            r = CUSTOM_FACTION_BAR_COLORS[reaction].r
-            g = CUSTOM_FACTION_BAR_COLORS[reaction].g
-            b = CUSTOM_FACTION_BAR_COLORS[reaction].b
-        else
-            r, g, b = 157/255, 197/255, 255/255
-        end
-    end
-
-    return r, g, b
+    return BasicUI:GetUnitColor(unit)
 end
-
-hooksecurefunc("TargetFrame_CheckFaction", function(self)
-    if UnitPlayerControlled(self.unit) then
-        self.nameBackground:SetVertexColor(GameTooltip_UnitColor(self.unit))
-    end
-end)
 
 --============================================================
 -- Tooltip Font Setup
 --============================================================
-local function ApplyTooltipFonts(db)
+function ApplyTooltipFonts(db)
+
+    if not db or not db.enabled then return end
+
     if db.fontOutline then
-        GameTooltipText:SetFont([[Fonts\FRIZQT__.ttf]], db.fontSize, 'THINOUTLINE')
+
+        GameTooltipText:SetFont(db.font, db.fontSize, 'THINOUTLINE')
         GameTooltipText:SetShadowOffset(0, 0)
 
-        GameTooltipTextSmall:SetFont([[Fonts\FRIZQT__.ttf]], db.fontSize, 'THINOUTLINE')
+        GameTooltipTextSmall:SetFont(db.font, db.fontSize, 'THINOUTLINE')
         GameTooltipTextSmall:SetShadowOffset(0, 0)
-    else
-        GameTooltipText:SetFont([[Fonts\FRIZQT__.ttf]], db.fontSize)
-        GameTooltipTextSmall:SetFont([[Fonts\FRIZQT__.ttf]], db.fontSize)
-    end
-end
 
---============================================================
--- Tooltip Backdrop Styling
---============================================================
-local function ApplyTooltipStyle(self, db)
-    local bgsize
-    if self == ConsolidatedBuffsTooltip then
-        bgsize = 1
-    elseif self == FriendsTooltip then
-        FriendsTooltip:SetScale(1.1)
-        bgsize = 1
     else
-        bgsize = 3
+
+        GameTooltipText:SetFont(db.font, db.fontSize)
+        GameTooltipTextSmall:SetFont(db.font, db.fontSize)
+
     end
 
-    self:SetBackdrop({
-        bgFile = [[Interface\DialogFrame\UI-DialogBox-Background-Dark]],
-        edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
-        tile = true, tileSize = 16, edgeSize = 18,
-        insets = { left = bgsize, right = bgsize, top = bgsize, bottom = bgsize }
-    })
-
-    self:HookScript('OnShow', function(self)
-        self:SetBackdropColor(0, 0, 0, db.bgDarkness)
-    end)
 end
-
 
 --============================================================
 -- SECTION 3: Item Quality Border Coloring
 --============================================================
-if DB().itemqualityBorderColor then
+function M:SetupItemQualityBorder()
+
+    if not db.itemqualityBorderColor then return end
+
     for _, tooltip in pairs({
         GameTooltip,
         ItemRefTooltip,
@@ -166,7 +128,7 @@ if DB().itemqualityBorderColor then
         ShoppingTooltip2,
         ShoppingTooltip3,
     }) do
-        tooltip:HookScript('OnTooltipSetItem', function(self)
+        tooltip:HookScript("OnTooltipSetItem", function(self)
             local name, item = self:GetItem()
             if item then
                 local quality = select(3, GetItemInfo(item))
@@ -177,10 +139,11 @@ if DB().itemqualityBorderColor then
             end
         end)
 
-        tooltip:HookScript('OnTooltipCleared', function(self)
+        tooltip:HookScript("OnTooltipCleared", function(self)
             self:SetBackdropBorderColor(1, 1, 1)
         end)
     end
+
 end
 
 --============================================================
@@ -266,7 +229,7 @@ local function GetFormattedUnitString(unit, specIcon)
         return GetFormattedUnitLevel(unit)
             .. UnitRace(unit)
             .. GetFormattedUnitClass(unit)
-            .. (DB().showSpecializationIcon and specIcon or '')
+            .. (db.showSpecializationIcon and specIcon or '')
     else
         return GetFormattedUnitLevel(unit)
             .. GetFormattedUnitClassification(unit)
@@ -324,12 +287,12 @@ end
 local function SetHealthBarColor(unit)
     local r, g, b
 
-    if DB().healthbar.customColor.apply and not DB().healthbar.reactionColoring then
-        r = DB().healthbar.customColor.r
-        g = DB().healthbar.customColor.g
-        b = DB().healthbar.customColor.b
+    if db.healthbar.customColor.apply and not db.healthbar.reactionColoring then
+        r = db.healthbar.customColor.r
+        g = db.healthbar.customColor.g
+        b = db.healthbar.customColor.b
 
-    elseif DB().healthbar.reactionColoring and unit then
+    elseif db.healthbar.reactionColoring and unit then
         r, g, b = GameTooltip_UnitColor(unit)
 
     else
@@ -358,12 +321,12 @@ local function GetUnitPVPIcon(unit)
     local faction = UnitFactionGroup(unit)
 
     if UnitIsPVPFreeForAll(unit) then
-        return DB().showPVPIcons
+        return db.showPVPIcons
             and '|TInterface\\AddOns\\cTooltip\\Media\\UI-PVP-FFA:12|t'
             or '|cffFF0000# |r'
 
     elseif faction and UnitIsPVP(unit) then
-        return DB().showPVPIcons
+        return db.showPVPIcons
             and '|TInterface\\AddOns\\cTooltip\\Media\\UI-PVP-'..faction..':12|t'
             or '|cff00FF00# |r'
     end
@@ -374,145 +337,170 @@ end
 --============================================================
 -- Tooltip Unit Hook
 --============================================================
-GameTooltip.inspectCache = {}
+function M:SetupUnitTooltipHook()
 
-GameTooltip:HookScript('OnTooltipSetUnit', function(self)
-    local unit = GetRealUnit(self)
+    GameTooltip.inspectCache = {}
 
-    if DB().hideInCombat and InCombatLockdown() then
-        self:Hide()
-        return
-    end
+    GameTooltip:HookScript("OnTooltipSetUnit", function(self)
 
-    if UnitExists(unit) and UnitName(unit) ~= UNKNOWN then
-        local ilvl = 0
-        local specIcon = ''
-        local lastUpdate = 30
+        if not db or not db.enabled then return end
 
-        for _, cache in pairs(self.inspectCache) do
-            if cache.GUID == UnitGUID(unit) then
-                ilvl = cache.itemLevel or 0
-                specIcon = cache.specIcon or ''
-                lastUpdate = cache.lastUpdate
-                    and math.abs(cache.lastUpdate - math.floor(GetTime()))
-                    or 30
+        local unit = GetRealUnit(self)
+
+        if db.hideInCombat and InCombatLockdown() then
+            self:Hide()
+            return
+        end
+
+        if UnitExists(unit) and UnitName(unit) ~= UNKNOWN then
+            local ilvl = 0
+            local specIcon = ""
+            local lastUpdate = 30
+
+            for _, cache in pairs(self.inspectCache) do
+                if cache.GUID == UnitGUID(unit) then
+                    ilvl = cache.itemLevel or 0
+                    specIcon = cache.specIcon or ""
+                    lastUpdate = cache.lastUpdate
+                        and math.abs(cache.lastUpdate - math.floor(GetTime()))
+                        or 30
+                end
             end
-        end
 
-        if unit and CanInspect(unit) then
-            if not self.inspectRefresh and lastUpdate >= 30 and not self.blockInspectRequests then
-                self.inspectRequestSent = true
-                NotifyInspect(unit)
+            if unit and CanInspect(unit) then
+                if not self.inspectRefresh and lastUpdate >= 30 and not self.blockInspectRequests then
+                    self.inspectRequestSent = true
+                    NotifyInspect(unit)
+                end
             end
-        end
 
-        self.inspectRefresh = false
+            self.inspectRefresh = false
 
-        local name, realm = UnitName(unit)
-        local r, g, b = GameTooltip_UnitColor(unit) -- Get dynamic color
+            local name, realm = UnitName(unit)
+            local r, g, b = GameTooltip_UnitColor(unit)
 
-        if DB().showPlayerTitles and UnitPVPName(unit) then
-            name = UnitPVPName(unit)
-        end
-
-        -- APPLY NAME COLOR TO TOOLTIP
-        GameTooltipTextLeft1:SetText(name)
-        GameTooltipTextLeft1:SetTextColor(r, g, b)
-
-        local guildName = GetGuildInfo(unit)
-        if guildName then
-            GameTooltipTextLeft2:SetText('|cffFF66CC'..GameTooltipTextLeft2:GetText()..'|r')
-        end
-
-        for i = 2, GameTooltip:NumLines() do
-            local line = _G['GameTooltipTextLeft'..i]
-            if line:GetText():find('^'..TOOLTIP_UNIT_LEVEL:gsub('%%s', '.+')) then
-                line:SetText(GetFormattedUnitString(unit, specIcon))
+            if db.showPlayerTitles and UnitPVPName(unit) then
+                name = UnitPVPName(unit)
             end
-        end
 
-        if DB().showUnitRole then
-            self:AddLine(GetUnitRoleString(unit), 1, 1, 1)
-        end
+            GameTooltipTextLeft1:SetText(name)
+            GameTooltipTextLeft1:SetTextColor(r, g, b)
 
-        if DB().showMouseoverTarget then
-            AddMouseoverTarget(self, unit)
-        end
-
-        for i = 3, GameTooltip:NumLines() do
-            local line = _G['GameTooltipTextLeft'..i]
-            if line:GetText():find(PVP_ENABLED) then
-                line:SetText(nil)
-                GameTooltipTextLeft1:SetText(GetUnitPVPIcon(unit)..GameTooltipTextLeft1:GetText())
+            local guildName = GetGuildInfo(unit)
+            if guildName then
+                GameTooltipTextLeft2:SetText("|cffFF66CC"..GameTooltipTextLeft2:GetText().."|r")
             end
-        end
 
-        GameTooltipTextLeft1:SetText(GetUnitRaidIcon(unit)..GameTooltipTextLeft1:GetText())
+            for i = 2, GameTooltip:NumLines() do
+                local line = _G["GameTooltipTextLeft"..i]
+                if line:GetText() and line:GetText():find("^"..TOOLTIP_UNIT_LEVEL:gsub("%%s", ".+")) then
+                    line:SetText(GetFormattedUnitString(unit, specIcon))
+                end
+            end
 
-        if UnitIsAFK(unit) then
-            self:AppendText('|cff00ff00 <AFK>|r')
-        elseif UnitIsDND(unit) then
-            self:AppendText('|cff00ff00 <DND>|r')
-        end
+            if db.showUnitRole then
+                self:AddLine(GetUnitRoleString(unit), 1, 1, 1)
+            end
 
-        if realm and realm ~= '' then
-            if DB().abbrevRealmNames then
-                self:AppendText(' (*)')
+            if db.showMouseoverTarget then
+                AddMouseoverTarget(self, unit)
+            end
+
+            for i = 3, GameTooltip:NumLines() do
+                local line = _G["GameTooltipTextLeft"..i]
+                if line:GetText() and line:GetText():find(PVP_ENABLED) then
+                    line:SetText(nil)
+                    GameTooltipTextLeft1:SetText(GetUnitPVPIcon(unit)..GameTooltipTextLeft1:GetText())
+                end
+            end
+
+            GameTooltipTextLeft1:SetText(GetUnitRaidIcon(unit)..GameTooltipTextLeft1:GetText())
+
+            if UnitIsAFK(unit) then
+                self:AppendText("|cff00ff00 <AFK>|r")
+            elseif UnitIsDND(unit) then
+                self:AppendText("|cff00ff00 <DND>|r")
+            end
+
+            if realm and realm ~= "" then
+                if db.abbrevRealmNames then
+                    self:AppendText(" (*)")
+                else
+                    self:AppendText(" - "..realm)
+                end
+            end
+
+            if GameTooltipStatusBar:IsShown() then
+                self:AddLine(" ")
+                GameTooltipStatusBar:ClearAllPoints()
+                GameTooltipStatusBar:SetPoint("LEFT", self:GetName().."TextLeft"..self:NumLines(), 1, -3)
+                GameTooltipStatusBar:SetPoint("RIGHT", self, -10, 0)
+            end
+
+            if db.reactionBorderColor then
+                self:SetBackdropBorderColor(r, g, b)
+            end
+
+            if UnitIsDead(unit) or UnitIsGhost(unit) then
+                GameTooltipStatusBar:SetBackdropColor(0.5, 0.5, 0.5, 0.3)
             else
-                self:AppendText(' - '..realm)
+                if not db.healthbar.customColor.apply and not db.healthbar.reactionColoring then
+                    GameTooltipStatusBar:SetBackdropColor(27/255, 243/255, 27/255, 0.3)
+                else
+                    SetHealthBarColor(unit)
+                end
             end
         end
 
-        if GameTooltipStatusBar:IsShown() then
-            self:AddLine(' ')
-            GameTooltipStatusBar:ClearAllPoints()
-            GameTooltipStatusBar:SetPoint('LEFT', self:GetName()..'TextLeft'..self:NumLines(), 1, -3)
-            GameTooltipStatusBar:SetPoint('RIGHT', self, -10, 0)
-        end
+    end)
 
-        if DB().reactionBorderColor then
-            self:SetBackdropBorderColor(r, g, b)
-        end
-
-        if UnitIsDead(unit) or UnitIsGhost(unit) then
-            GameTooltipStatusBar:SetBackdropColor(0.5, 0.5, 0.5, 0.3)
-        else
-            if not DB().healthbar.customColor.apply and not DB().healthbar.reactionColoring then
-                GameTooltipStatusBar:SetBackdropColor(27/255, 243/255, 27/255, 0.3)
-            else
-                SetHealthBarColor(unit)
-            end
-        end
-    end
-end)
+end
 
 --============================================================
 -- Tooltip Cleared & Healthbar Logic
 --============================================================
-GameTooltip:HookScript('OnTooltipCleared', function(self)
-    GameTooltipStatusBar:ClearAllPoints()
-    GameTooltipStatusBar:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 0.5, 3)
-    GameTooltipStatusBar:SetPoint('BOTTOMRIGHT', self, 'TOPRIGHT', -1, 3)
-    GameTooltipStatusBar:SetBackdropColor(0, 1, 0, 0.3)
+function M:SetupTooltipClearedHook()
 
-    if DB().reactionBorderColor then
-        self:SetBackdropBorderColor(1, 1, 1)
-    end
-end)
+    GameTooltip:HookScript("OnTooltipCleared", function(self)
+
+        local bar = GameTooltipStatusBar
+
+        bar:ClearAllPoints()
+        bar:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0.5, 3)
+        bar:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", -1, 3)
+        bar:SetBackdropColor(0, 1, 0, 0.3)
+
+        if db.reactionBorderColor then
+            self:SetBackdropBorderColor(1, 1, 1)
+        end
+
+    end)
+
+end
 
 --------------------------------------------------------------
 -- Healthbar Text
 --------------------------------------------------------------
-local bar = GameTooltipStatusBar
-bar.Text = bar:CreateFontString(nil, 'OVERLAY')
-bar.Text:SetPoint('CENTER', bar, DB().healthbar.textPos, 0, 1)
+function M:SetupHealthBarText()
 
-if DB().healthbar.showOutline then
-    bar.Text:SetFont(DB().healthbar.font, DB().healthbar.fontSize, 'THINOUTLINE')
-    bar.Text:SetShadowOffset(0, 0)
-else
-    bar.Text:SetFont(DB().healthbar.font, DB().healthbar.fontSize)
-    bar.Text:SetShadowOffset(1, -1)
+    if not db.healthbar then return end
+
+    local bar = GameTooltipStatusBar
+
+    if not bar.Text then
+        bar.Text = bar:CreateFontString(nil, "OVERLAY")
+    end
+
+    bar.Text:SetPoint("CENTER", bar, db.healthbar.textPos, 0, 1)
+
+    if db.healthbar.showOutline then
+        bar.Text:SetFont(db.healthbar.font, db.healthbar.fontSize, "THINOUTLINE")
+        bar.Text:SetShadowOffset(0, 0)
+    else
+        bar.Text:SetFont(db.healthbar.font, db.healthbar.fontSize)
+        bar.Text:SetShadowOffset(1, -1)
+    end
+
 end
 
 local function ColorGradient(perc, ...)
@@ -563,63 +551,488 @@ local function GetHealthTag(text, cur, max)
     return text
 end
 
-GameTooltipStatusBar:HookScript('OnValueChanged', function(self, value)
-    if not value then return end
+function M:SetupHealthBarHook()
 
-    local min, max = self:GetMinMaxValues()
-    if value < min or value > max or value == 0 or value == 1 then return end
+    local bar = GameTooltipStatusBar
 
-    local fullString = GetHealthTag(DB().healthbar.healthFullFormat, value, max)
-    local normalString = GetHealthTag(DB().healthbar.healthFormat, value, max)
+    if self.healthBarHooked then return end
+    self.healthBarHooked = true
 
-    local perc = (value/max)*100
-    if perc >= 100 then
-        self.Text:SetText(fullString)
-    else
-        self.Text:SetText(normalString)
-    end
-end)
+    bar:HookScript("OnValueChanged", function(self, value)
+
+        if not db or not db.enabled or not value then return end
+
+        local min, max = self:GetMinMaxValues()
+        if value < min or value > max or value == 0 or value == 1 then return end
+
+        local fullString = GetHealthTag(db.healthbar.healthFullFormat, value, max)
+        local normalString = GetHealthTag(db.healthbar.healthFormat, value, max)
+
+        local perc = (value / max) * 100
+
+        if perc >= 100 then
+            self.Text:SetText(fullString)
+        else
+            self.Text:SetText(normalString)
+        end
+
+    end)
+
+end
 
 --------------------------------------------------------------
 -- Buff Tooltip Border Coloring
 --------------------------------------------------------------
 local function StyleBuffTooltip(self, unit, index, filter)
+
+    if not db or not db.enabled then return end
+	
     local r, g, b = GameTooltip_UnitColor(unit)
     self:SetBackdropBorderColor(r, g, b)
 end
 
-hooksecurefunc(GameTooltip, "SetUnitBuff", StyleBuffTooltip)
-hooksecurefunc(GameTooltip, "SetUnitDebuff", StyleBuffTooltip)
-hooksecurefunc(GameTooltip, "SetUnitAura", StyleBuffTooltip)
+--============================================================
+-- Tooltip Backdrop Styling
+--============================================================
+function ApplyTooltipStyle(self, db)
+
+    if not db or not db.enabled then return end
+
+    local bgsize
+
+    if self == ConsolidatedBuffsTooltip then
+        bgsize = 1
+
+    elseif self == FriendsTooltip then
+        FriendsTooltip:SetScale(1.1)
+        bgsize = 1
+
+    else
+        bgsize = 3
+    end
+
+    self:SetBackdrop({
+        bgFile = [[Interface\DialogFrame\UI-DialogBox-Background-Dark]],
+        edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+        tile = true,
+        tileSize = 16,
+        edgeSize = 18,
+        insets = {
+            left = bgsize,
+            right = bgsize,
+            top = bgsize,
+            bottom = bgsize
+        }
+    })
+
+    self:HookScript("OnShow", function(self)
+        self:SetBackdropColor(0, 0, 0, db.bgDarkness or 1)
+    end)
+
+end
+
+function M:SetupHooks()
+
+    if self.hooked then return end
+
+    hooksecurefunc(GameTooltip, "SetUnitBuff", StyleBuffTooltip)
+    hooksecurefunc(GameTooltip, "SetUnitDebuff", StyleBuffTooltip)
+    hooksecurefunc(GameTooltip, "SetUnitAura", StyleBuffTooltip)
+
+    hooksecurefunc("TargetFrame_CheckFaction", function(self)
+
+		if not db or not db.enabled then return end
+		
+        if UnitPlayerControlled(self.unit) then
+            self.nameBackground:SetVertexColor(GameTooltip_UnitColor(self.unit))
+        end
+    end)
+
+    self.hooked = true
+
+end
 
 --============================================================
 -- SECTION 5: Lifecycle + Registration
 --============================================================
 function M:OnInit()
-    -- This is now handled by BasicUI:RegisterModule
-    -- But we add a safety check here
-    if not self.db then self.db = {} end
+
+    BasicDB = BasicDB or {}
+    BasicDB.Tooltip = BasicDB.Tooltip or {}
+
+    self.db = BasicDB.Tooltip
+    db = self.db
+
+    BasicUI:CopyDefaults(self.defaults, self.db)
+
+    if not db.enabled then
+        return
+    end
+
+    ------------------------------------------------
+    -- Setup Tooltip Features
+    ------------------------------------------------
+    self:SetupItemQualityBorder()
+    self:SetupHealthBarText()
+    self:SetupTooltipClearedHook()
+    self:SetupUnitTooltipHook()
+    self:SetupHealthBarHook()
+
 end
 
 function M:OnLoadScreen()
-    -- Ensure db is pointing to the right place
-    local db = self.db or (BasicConfig and BasicConfig.Tooltip) or {}
 
-    -- Apply fonts
+    db = self.db or {}
+
     ApplyTooltipFonts(db)
 
-    -- Style tooltips
-    for _, tooltip in pairs({
-        GameTooltip, ItemRefTooltip, ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3,
-        WorldMapTooltip, DropDownList1MenuBackdrop, DropDownList2MenuBackdrop,
-        ConsolidatedBuffsTooltip, ChatMenu, EmoteMenu, LanguageMenu,
-        VoiceMacroMenu, FriendsTooltip, PetBuffTooltip, PlayerBuffTooltip,
-    }) do
-        ApplyTooltipStyle(tooltip, db)
-    end
+	for _, tooltip in ipairs(TOOLTIP_FRAMES) do
+		if tooltip then
+			ApplyTooltipStyle(tooltip, db)
+		end
+	end
+
 end
 
--- This triggers the registration and the OnInit call
+local function TooltipDisabled()
+    return not M.db.enabled
+end
+
+--============================================================
+-- OPTIONS
+--============================================================
+
+M.options = {
+    type = "group",
+    name = "Tooltip",
+    args = {
+
+        enabled = {
+            type = "toggle",
+            name = "Enable Tooltip Styling",
+            desc = "Enable BasicUI styling and enhancements for game tooltips.",
+            order = 1,
+			width = "full",
+            get = function() return M.db.enabled end,
+            set = function(_, v)
+                M.db.enabled = v
+                BasicUI:RequestReload()
+            end,
+        },
+
+        ------------------------------------------------
+        -- Appearance
+        ------------------------------------------------
+
+        appearance = {
+            type = "group",
+            name = "Appearance",
+            inline = true,
+            order = 2,
+			disabled = TooltipDisabled,
+            args = {
+
+                fontSize = {
+                    type = "range",
+                    name = "Tooltip Font Size",
+                    desc = "Adjust the font size used in tooltips.",
+                    min = 8, max = 32, step = 1,
+                    order = 1,
+                    get = function() return M.db.fontSize end,
+                    set = function(_, v)
+                        M.db.fontSize = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                fontOutline = {
+                    type = "toggle",
+                    name = "Font Outline",
+                    desc = "Enable an outline on tooltip text for improved readability.",
+                    order = 2,
+                    get = function() return M.db.fontOutline end,
+                    set = function(_, v)
+                        M.db.fontOutline = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                bgDarkness = {
+                    type = "range",
+                    name = "Background Darkness",
+                    desc = "Adjust how dark the tooltip background appears.",
+                    min = 0,
+                    max = 1,
+                    step = 0.05,
+                    order = 3,
+                    get = function() return M.db.bgDarkness end,
+                    set = function(_, v)
+                        M.db.bgDarkness = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                reactionBorderColor = {
+                    type = "toggle",
+                    name = "Reaction Border Color",
+                    desc = "Color the tooltip border based on the unit's reaction.",
+                    order = 4,
+                    get = function() return M.db.reactionBorderColor end,
+                    set = function(_, v)
+                        M.db.reactionBorderColor = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                itemqualityBorderColor = {
+                    type = "toggle",
+                    name = "Item Quality Border",
+                    desc = "Color the tooltip border based on item quality.",
+                    order = 5,
+                    get = function() return M.db.itemqualityBorderColor end,
+                    set = function(_, v)
+                        M.db.itemqualityBorderColor = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+            },
+        },
+
+        ------------------------------------------------
+        -- Behavior
+        ------------------------------------------------
+
+        behavior = {
+            type = "group",
+            name = "Behavior",
+            inline = true,
+            order = 3,
+			disabled = TooltipDisabled,
+            args = {
+
+                showOnMouseover = {
+                    type = "toggle",
+                    name = "Anchor to Mouse",
+                    desc = "Display the tooltip at the mouse cursor instead of the default anchor.",
+                    order = 1,
+                    get = function() return M.db.showOnMouseover end,
+                    set = function(_, v)
+                        M.db.showOnMouseover = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                hideInCombat = {
+                    type = "toggle",
+                    name = "Hide in Combat",
+                    desc = "Hide tooltips while you are in combat.",
+                    order = 2,
+                    get = function() return M.db.hideInCombat end,
+                    set = function(_, v)
+                        M.db.hideInCombat = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+            },
+        },
+
+        ------------------------------------------------
+        -- Information
+        ------------------------------------------------
+
+        information = {
+            type = "group",
+            name = "Information",
+            inline = true,
+            order = 4,
+			disabled = TooltipDisabled,
+            args = {
+
+                abbrevRealmNames = {
+                    type = "toggle",
+                    name = "Abbreviate Realm Names",
+                    desc = "Shorten realm names when displaying player information.",
+                    order = 1,
+                    get = function() return M.db.abbrevRealmNames end,
+                    set = function(_, v)
+                        M.db.abbrevRealmNames = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                hideRealmText = {
+                    type = "toggle",
+                    name = "Hide Realm Names",
+                    desc = "Hide the realm name portion of player names.",
+                    order = 2,
+                    get = function() return M.db.hideRealmText end,
+                    set = function(_, v)
+                        M.db.hideRealmText = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showPlayerTitles = {
+                    type = "toggle",
+                    name = "Show Player Titles",
+                    desc = "Display player titles in tooltips.",
+                    order = 3,
+                    get = function() return M.db.showPlayerTitles end,
+                    set = function(_, v)
+                        M.db.showPlayerTitles = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showUnitRole = {
+                    type = "toggle",
+                    name = "Show Unit Role",
+                    desc = "Display the group role (tank, healer, damage) in the tooltip.",
+                    order = 4,
+                    get = function() return M.db.showUnitRole end,
+                    set = function(_, v)
+                        M.db.showUnitRole = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showPVPIcons = {
+                    type = "toggle",
+                    name = "Show PvP Icons",
+                    desc = "Display PvP faction icons for players.",
+                    order = 5,
+                    get = function() return M.db.showPVPIcons end,
+                    set = function(_, v)
+                        M.db.showPVPIcons = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showMouseoverTarget = {
+                    type = "toggle",
+                    name = "Show Mouseover Target",
+                    desc = "Display the target of the unit currently being hovered.",
+                    order = 6,
+                    get = function() return M.db.showMouseoverTarget end,
+                    set = function(_, v)
+                        M.db.showMouseoverTarget = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showSpecializationIcon = {
+                    type = "toggle",
+                    name = "Show Specialization Icon",
+                    desc = "Display the player's specialization icon.",
+                    order = 7,
+                    get = function() return M.db.showSpecializationIcon end,
+                    set = function(_, v)
+                        M.db.showSpecializationIcon = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showItemLevel = {
+                    type = "toggle",
+                    name = "Show Item Level",
+                    desc = "Display the item level in item tooltips.",
+                    order = 8,
+                    get = function() return M.db.showItemLevel end,
+                    set = function(_, v)
+                        M.db.showItemLevel = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+            },
+        },
+
+        ------------------------------------------------
+        -- Health Bar
+        ------------------------------------------------
+
+        healthbar = {
+            type = "group",
+            name = "Health Bar",
+            inline = true,
+            order = 5,
+			disabled = TooltipDisabled,
+            args = {
+
+                fontSize = {
+                    type = "range",
+                    name = "Health Text Size",
+                    desc = "Adjust the font size of the tooltip health text.",
+                    min = 8, max = 32, step = 1,
+                    order = 1,
+                    get = function() return M.db.healthbar.fontSize end,
+                    set = function(_, v)
+                        M.db.healthbar.fontSize = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                showOutline = {
+                    type = "toggle",
+                    name = "Health Text Outline",
+                    desc = "Enable an outline on tooltip health text.",
+                    order = 2,
+                    get = function() return M.db.healthbar.showOutline end,
+                    set = function(_, v)
+                        M.db.healthbar.showOutline = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                reactionColoring = {
+                    type = "toggle",
+                    name = "Reaction Health Coloring",
+                    desc = "Color the health bar based on the unit's reaction.",
+                    order = 3,
+                    get = function() return M.db.healthbar.reactionColoring end,
+                    set = function(_, v)
+                        M.db.healthbar.reactionColoring = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                apply = {
+                    type = "toggle",
+                    name = "Enable Custom Health Color",
+                    desc = "Apply a custom color to the tooltip health bar.",
+                    order = 4,
+                    get = function() return M.db.healthbar.customColor.apply end,
+                    set = function(_, v)
+                        M.db.healthbar.customColor.apply = v
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+                color = {
+                    type = "color",
+                    name = "Custom Health Color",
+                    desc = "Choose a custom color for the tooltip health bar.",
+                    order = 5,
+                    get = function()
+                        local c = M.db.healthbar.customColor
+                        return c.r, c.g, c.b
+                    end,
+                    set = function(_, r, g, b)
+                        local c = M.db.healthbar.customColor
+                        c.r, c.g, c.b = r, g, b
+                        BasicUI:RequestReload()
+                    end,
+                },
+
+            },
+        },
+
+    },
+}
+
+--============================================================
+-- REGISTER MODULE
+--============================================================
 BasicUI:RegisterModule(MODULE_NAME, M)
-
-

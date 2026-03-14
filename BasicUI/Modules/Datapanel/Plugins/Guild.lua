@@ -1,9 +1,9 @@
---============================================================
+--==============================
 -- PLUGIN: Guild
--- Datapanel version (no Ace3, no options UI)
---============================================================
-local parent = BasicUI:GetModule("Datapanel")
-local M = parent
+--==============================
+
+local Datapanel = BasicUI:GetModule("Datapanel")
+if not Datapanel then return end
 
 local Plugin = {}
 Plugin.name = "guild"
@@ -12,33 +12,37 @@ Plugin.name = "guild"
 -- OnEnable
 --============================================================
 function Plugin:OnEnable()
-    -- Ascension does NOT fire this reliably, but we still hook it
-    M:RegisterEvent("GUILD_ROSTER_UPDATE", function()
-        Plugin:Refresh()
+
+    Datapanel:RegisterEvent("GUILD_ROSTER_UPDATE", function()
+        self:Refresh()
     end)
 
-    -- Force initial roster request
-    M:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+    Datapanel:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+
         if IsInGuild() then
             GuildRoster()
-            Plugin:Refresh()
+            self:Refresh()
         end
+
     end)
+
 end
 
 --============================================================
 -- Refresh (panel text)
 --============================================================
 function Plugin:Refresh()
+
     if not self.frame then return end
 
     if not IsInGuild() then
-        self.frame.text:SetText("|cff" .. M:GetClassHex() .. "No Guild|r")
+
+        self.frame.text:SetText("|cff"..Datapanel:GetClassHex().."No Guild|r")
         self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
         return
+
     end
 
-    -- Ascension requires forcing a roster request
     GuildRoster()
 
     local total = GetNumGuildMembers()
@@ -51,18 +55,18 @@ function Plugin:Refresh()
         end
     end
 
-    local hex = M:GetClassHex()
-    self.frame.text:SetText("|cff" .. hex .. "Guild:|r " .. online)
+    local hex = Datapanel:GetClassHex()
+
+    self.frame.text:SetText("|cff"..hex.."Guild:|r "..online)
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
+
 end
 
 --============================================================
 -- Tooltip
 --============================================================
---============================================================
--- Tooltip (Modified for Reactive Level Colors)
---============================================================
 local function ShowTooltip(self)
+
     if not IsInGuild() then return end
 
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
@@ -70,52 +74,63 @@ local function ShowTooltip(self)
 
     local total = GetNumGuildMembers()
     local online = 0
-    -- We'll check online count later in the loop to be efficient
-    
-    -- Class‑colored header
-    local header = M:GetColoredPlayerHeader("Guild")
+
+    local header = Datapanel:GetColoredPlayerHeader("Guild")
     GameTooltip:AddLine(header)
 
     local guildName = GetGuildInfo("player") or "Unknown Guild"
-    GameTooltip:AddLine("|cffFF66CC" .. guildName .. "|r")
+    GameTooltip:AddLine("|cffFF66CC"..guildName.."|r")
     GameTooltip:AddLine("|cff666666-------------------------|r")
 
-    -- Pre-calculate online count for the summary line
     for i = 1, total do
         local _, _, _, _, _, _, _, _, connected = GetGuildRosterInfo(i)
-        if connected then online = online + 1 end
+        if connected then
+            online = online + 1
+        end
     end
 
-    GameTooltip:AddDoubleLine("|cffffff00Online:|r",
+    GameTooltip:AddDoubleLine(
+        "|cffffff00Online:|r",
         string.format("%d / %d", online, total),
-        1,1,1, 1,1,1
+        1,1,1,
+        1,1,1
     )
 
     GameTooltip:AddLine(" ")
 
     for i = 1, total do
+
         local name, _, _, level, classLoc, zone, _, _, connected, status, classFile =
             GetGuildRosterInfo(i)
 
         if connected and name then
-            -- Get reactive color based on your level vs member level
+
             local diffColor = GetQuestDifficultyColor(level)
-            local levelHex = string.format("%02x%02x%02x", diffColor.r*255, diffColor.g*255, diffColor.b*255)
-            
-            -- Keep original class color for the name
+
+            local levelHex = string.format(
+                "%02x%02x%02x",
+                diffColor.r*255,
+                diffColor.g*255,
+                diffColor.b*255
+            )
+
             local cc = RAID_CLASS_COLORS[classFile] or {r=1,g=1,b=1}
 
             local left = string.format(
                 "|cff%s[%d]|r |cff%02x%02x%02x%s|r %s",
-                levelHex, -- Now uses the reactive difficulty color
+                levelHex,
                 level,
-                cc.r*255, cc.g*255, cc.b*255,
+                cc.r*255,
+                cc.g*255,
+                cc.b*255,
                 name,
                 status or ""
             )
 
             GameTooltip:AddDoubleLine(left, zone or "Unknown", 1,1,1, 0.7,0.7,0.7)
+
         end
+
     end
 
     GameTooltip:AddLine(" ")
@@ -123,95 +138,128 @@ local function ShowTooltip(self)
     GameTooltip:AddLine("|cff00ff00<Right-Click> Open Guild Menu|r")
 
     GameTooltip:Show()
+
 end
 
 --============================================================
 -- Right-click Menu Builder
 --============================================================
-local menuFrame = CreateFrame("Frame", "DatapanelGuildMenu", UIParent, "UIDropDownMenuTemplate")
+local menuFrame = CreateFrame("Frame","DatapanelGuildMenu",UIParent,"UIDropDownMenuTemplate")
 
 local function OpenGuildMenu()
+
     local total = GetNumGuildMembers()
+
     local menu = {
         { text = "Guild Members Online", isTitle = true, notCheckable = true },
     }
 
     for i = 1, total do
+
         local name, _, _, level, _, _, _, _, connected, _, classFile =
             GetGuildRosterInfo(i)
 
         if connected and name then
-            local cc = RAID_CLASS_COLORS[classFile] or {r=1,g=1,b=1}
-            local hex = string.format("|cff%02x%02x%02x", cc.r*255, cc.g*255, cc.b*255)
 
-            table.insert(menu, {
-                text = string.format("|cffaaaaaa[%d]|r %s%s|r", level, hex, name),
+            local cc = RAID_CLASS_COLORS[classFile] or {r=1,g=1,b=1}
+
+            local hex = string.format(
+                "|cff%02x%02x%02x",
+                cc.r*255,
+                cc.g*255,
+                cc.b*255
+            )
+
+            table.insert(menu,{
+                text = string.format("|cffaaaaaa[%d]|r %s%s|r",level,hex,name),
                 hasArrow = true,
                 notCheckable = true,
                 menuList = {
                     {
                         text = "Whisper",
-                        func = function() ChatFrame_OpenChat("/w " .. name .. " ") end,
+                        func = function()
+                            ChatFrame_OpenChat("/w "..name.." ")
+                        end,
                         notCheckable = true
                     },
                     {
                         text = "Invite",
-                        func = function() InviteUnit(name) end,
+                        func = function()
+                            InviteUnit(name)
+                        end,
                         notCheckable = true
                     },
                 }
             })
+
         end
+
     end
 
-    EasyMenu(menu, menuFrame, "cursor", 0, 0, "MENU")
+    EasyMenu(menu,menuFrame,"cursor",0,0,"MENU")
+
 end
 
 --============================================================
 -- CreateFrame
 --============================================================
 function Plugin:CreateFrame(parent)
+
     local f = CreateFrame("Button", nil, parent)
+
     f:SetHeight(20)
     f:EnableMouse(true)
 
-    f.text = f:CreateFontString(nil, "OVERLAY")
-    M:ApplyStandardFont(f.text)
+    f.text = f:CreateFontString(nil,"OVERLAY")
+    Datapanel:ApplyStandardFont(f.text)
     f.text:SetPoint("CENTER")
 
-    -- Tooltip
-    f:SetScript("OnEnter", ShowTooltip)
-    f:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f:SetScript("OnEnter",ShowTooltip)
+    f:SetScript("OnLeave",function() GameTooltip:Hide() end)
 
-    -- Left-click / Right-click
-    f:SetScript("OnMouseDown", function(_, btn)
+    f:SetScript("OnMouseDown",function(_,btn)
+
         if btn == "LeftButton" then
-            ToggleFriendsFrame(3) -- Guild tab
+            ToggleFriendsFrame(3)
+
         elseif btn == "RightButton" then
+
             if DropDownList1 and DropDownList1:IsShown() then
                 CloseDropDownMenus()
             else
                 OpenGuildMenu()
             end
+
         end
+
     end)
 
-    -- Auto-refresh every 10 seconds (Ascension requires polling)
-    f:SetScript("OnUpdate", function(self, elapsed)
+    f:SetScript("OnUpdate",function(self,elapsed)
+
         self.timer = (self.timer or 0) + elapsed
+
         if self.timer > 10 then
-            if IsInGuild() then GuildRoster() end
+
+            if IsInGuild() then
+                GuildRoster()
+            end
+
             Plugin:Refresh()
+
             self.timer = 0
+
         end
+
     end)
 
     self.frame = f
     self:Refresh()
+
     return f
+
 end
 
 --============================================================
 -- Register plugin
 --============================================================
-M:RegisterPlugin("guild", Plugin)
+Datapanel:RegisterPlugin("guild", Plugin)

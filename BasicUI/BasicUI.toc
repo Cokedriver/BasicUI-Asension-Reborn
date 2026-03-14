@@ -1,18 +1,32 @@
 ## Interface: 30300
 ## Title: BasicUI
-## Notes: SiDuB's Basic User Interface 
+## Notes: SiDuB's Basic User Interface
 ## Author: SiDuB
 ## Version: 3.3.5
 ## SavedVariables: BasicDB
 
 #============================================================
-# CORE
+# Libraries
 #============================================================
-BasicUI.lua
+
+Libs\LibStub.lua
+Libs\AceGUI-3.0.xml
+Libs\AceConfigRegistry-3.0.lua
+Libs\AceConfig-3.0.lua
+Libs\AceConfigDialog-3.0.lua
+Libs\AceSerializer-3.0.lua
 
 #============================================================
-# MODULES (Fonts must load immediately after Core)
+# Core
 #============================================================
+
+Core\Core.lua
+Core\API.lua
+
+#============================================================
+# Modules
+#============================================================
+
 Modules\Fonts.lua
 Modules\ActionBars.lua
 Modules\Buffs.lua
@@ -21,13 +35,11 @@ Modules\Tooltip.lua
 Modules\Unitframes.lua
 
 #============================================================
-# Datapanel Module
+# Datapanel
 #============================================================
+
 Modules\Datapanel\Datapanel.lua
 
-# ------------------
-# Datapanel Plugins
-# ------------------
 Modules\Datapanel\Plugins\BagSpace.lua
 Modules\Datapanel\Plugins\Durability.lua
 Modules\Datapanel\Plugins\Friends.lua
@@ -38,17 +50,15 @@ Modules\Datapanel\Plugins\Performance.lua
 Modules\Datapanel\Plugins\MainStats.lua
 
 #============================================================
-# QoL Module
+# QoL
 #============================================================
+
 Modules\QoL\QoL.lua
 
-# ------------------
-# QoL Sub Modules
-# ------------------
-Modules\QoL\Automation.lua
-Modules\QoL\AutoGreed.lua
-Modules\QoL\AltBuy.lua
-Modules\QoL\DoubleTradeSkill.lua
-Modules\QoL\MapCoords.lua
-Modules\QoL\Minimap.lua
-Modules\QoL\ZoneText.lua
+Modules\QoL\SubModules\Automation.lua
+Modules\QoL\SubModules\AutoGreed.lua
+Modules\QoL\SubModules\AltBuy.lua
+Modules\QoL\SubModules\DoubleTradeSkill.lua
+Modules\QoL\SubModules\MapCoords.lua
+Modules\QoL\SubModules\Minimap.lua
+Modules\QoL\SubModules\Notifications.lua

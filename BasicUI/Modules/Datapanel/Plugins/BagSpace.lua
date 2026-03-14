@@ -1,8 +1,12 @@
---============================================================
--- PLUGIN: BagSpace (Classic Visual Version for Ascension)
---============================================================
-local parent = BasicUI:GetModule("Datapanel")
-local M = parent
+--==============================
+-- PLUGIN: BagSpace
+--==============================
+
+local Datapanel = BasicUI:GetModule("Datapanel")
+if not Datapanel then return end
+
+local floor = math.floor
+local abs = math.abs
 
 local Plugin = {}
 Plugin.name = "bagspace"
@@ -17,6 +21,7 @@ local sessionGoldChange = 0
 -- Save Player Data (Classic DB Structure)
 --============================================================
 local function SavePlayerData()
+
     BasicDB = BasicDB or {}
     BasicDB.Gold = BasicDB.Gold or {}
 
@@ -39,34 +44,41 @@ local function SavePlayerData()
         sessionStartGold = gold
         sessionGoldChange = 0
     end
+
 end
 
 --============================================================
 -- Classic Gold Formatting
 --============================================================
 local function formatMoney(c)
+
     if not c or c < 0 then return "" end
 
     local str = ""
+
     if c >= 10000 then
         local g = floor(c/10000)
         c = c - g*10000
         str = str..g.."|cFFFFD800g|r "
     end
+
     if c >= 100 then
         local s = floor(c/100)
         c = c - s*100
         str = str..s.."|cFFC7C7C7s|r "
     end
+
     str = str..c.."|cFFEEA55Fc|r"
 
     return str
+
 end
 
 --============================================================
 -- Class Icon
 --============================================================
 local function GetClassIcon(class)
+
     if not class or not CLASS_ICON_TCOORDS[class] then
         return ""
     end
@@ -80,11 +92,9 @@ local function GetClassIcon(class)
         c[3]*256,
         c[4]*256
     )
+
 end
 
---============================================================
--- Currency Helper (ADDED)
---============================================================
 --============================================================
 -- Currency Helper (Wrath / 3.3.5 Compatible)
 --============================================================
@@ -95,7 +105,6 @@ local function AddCurrencyByName(currencyName)
     for i = 1, num do
         local name, isHeader, isExpanded, isUnused, isWatched, count = GetCurrencyListInfo(i)
 
-        -- Expand headers so sub-currencies are readable
         if isHeader and not isExpanded then
             ExpandCurrencyList(i, 1)
         end
@@ -112,51 +121,66 @@ local function AddCurrencyByName(currencyName)
             return
         end
     end
+
 end
 
 --============================================================
 -- OnEnable
 --============================================================
 function Plugin:OnEnable()
-    M:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+
+    Datapanel:RegisterEvent("PLAYER_ENTERING_WORLD", function()
         SavePlayerData()
-        Plugin:Refresh()
+        self:Refresh()
     end)
 
-    M:RegisterEvent("BAG_UPDATE", function()
+    Datapanel:RegisterEvent("BAG_UPDATE", function()
         SavePlayerData()
-        Plugin:Refresh()
+        self:Refresh()
     end)
 
-    M:RegisterEvent("PLAYER_MONEY", function()
+    Datapanel:RegisterEvent("PLAYER_MONEY", function()
+
         local gold = GetMoney()
+
         if sessionStartGold == 0 then
             sessionStartGold = gold
         end
+
         sessionGoldChange = gold - sessionStartGold
+
         SavePlayerData()
-        Plugin:Refresh()
+        self:Refresh()
+
     end)
+
 end
 
 --============================================================
 -- Refresh (Panel Text)
 --============================================================
 function Plugin:Refresh()
+
     if not self.frame then return end
 
     local free, total = 0, 0
 
     for bag = 0, NUM_BAG_SLOTS do
+
         local slots = GetContainerNumSlots(bag)
+
         if slots and slots > 0 then
+
             total = total + slots
+
             for slot = 1, slots do
                 if not GetContainerItemInfo(bag, slot) then
                     free = free + 1
                 end
             end
+
         end
+
     end
 
     local numColor
@@ -166,14 +190,7 @@ function Plugin:Refresh()
         numColor = "ffffff"
     end
 
-    local _, class = UnitClass("player")
-    local cc = RAID_CLASS_COLORS[class] or {r=1,g=1,b=1}
-
-    local classHex = string.format("%02x%02x%02x",
-        cc.r*255,
-        cc.g*255,
-        cc.b*255
-    )
+    local classHex = Datapanel:GetClassHex()
 
     local text = string.format(
         "|cff%sBags:|r |cff%s%d/%d|r",
@@ -185,6 +202,7 @@ function Plugin:Refresh()
 
     self.frame.text:SetText(text)
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
+
 end
 
 --============================================================
@@ -374,39 +392,16 @@ local function ShowTooltip(self)
 end
 
 --============================================================
--- Reset Gold Command (/rsg)
---============================================================
-local function RESETGOLD()
-    local realm = GetRealmName()
-    local name = UnitName("player")
-    local faction = UnitFactionGroup("player")
-
-    BasicDB = {}
-    BasicDB.Gold = {}
-    BasicDB.Gold[realm] = {}
-    BasicDB.Gold[realm][faction] = {}
-    BasicDB.Gold[realm][faction][name] = {
-        gold = GetMoney(),
-        level = UnitLevel("player"),
-        class = select(2, UnitClass("player"))
-    }
-
-    print("|cffeda55fGold database reset.|r")
-end
-
-SLASH_RESETGOLD1 = "/rsg"
-SlashCmdList["RESETGOLD"] = RESETGOLD
-
---============================================================
 -- CreateFrame
 --============================================================
 function Plugin:CreateFrame(parent)
+
     local f = CreateFrame("Button", nil, parent)
     f:SetHeight(20)
     f:RegisterForClicks("LeftButtonUp")
 
-    f.text = f:CreateFontString(nil, "OVERLAY")
-    M:ApplyStandardFont(f.text)
+    f.text = f:CreateFontString(nil,"OVERLAY")
+    Datapanel:ApplyStandardFont(f.text)
     f.text:SetPoint("CENTER")
 
     f:SetScript("OnClick", function() OpenAllBags() end)
@@ -415,10 +410,12 @@ function Plugin:CreateFrame(parent)
 
     self.frame = f
     self:Refresh()
+
     return f
+
 end
 
 --============================================================
 -- Register Plugin
 --============================================================
-M:RegisterPlugin("bagspace", Plugin)
+Datapanel:RegisterPlugin("bagspace", Plugin)

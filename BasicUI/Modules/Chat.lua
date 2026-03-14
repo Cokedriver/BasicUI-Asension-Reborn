@@ -1,6 +1,7 @@
 --============================================================
 -- MODULE: Chat (BasicUI + cChat merged, cursor-safe)
 --============================================================
+local addonName, BasicUI = ...
 local MODULE_NAME = "Chat"
 local M = {}
 
@@ -8,8 +9,9 @@ local M = {}
 -- CONFIG DEFAULTS
 --============================================================
 M.defaults = {
-    hideButtons  = false,
+    enabled = true,
     fullMovement = false,
+    fontSize = 16,
 }
 
 --============================================================
@@ -124,6 +126,11 @@ function M:OpenCopyWindow(text)
         eb:SetWidth(550)
         eb:SetAutoFocus(false)
         eb:SetScript("OnEscapePressed", function() f:Hide() end)
+		eb:SetScript("OnMouseUp", function(self, button)
+			if button == "RightButton" then
+				self:HighlightText()
+			end
+		end)
 
         scroll:SetScrollChild(eb)
 
@@ -331,6 +338,8 @@ end
 -- TAB COLORS
 --============================================================
 hooksecurefunc("FCFTab_UpdateColors", function(self, selected)
+
+    if not M.db or not M.db.enabled then return end
     local fs = self:GetFontString()
     if not fs then return end
 
@@ -345,6 +354,8 @@ end)
 -- SHORT CHANNEL HEADERS + BORDER COLOR
 --============================================================
 hooksecurefunc('ChatEdit_UpdateHeader', function(editBox)
+
+    if not M.db or not M.db.enabled then return end
     local type = editBox:GetAttribute('chatType')
     if not type then return end
 
@@ -356,9 +367,21 @@ end)
 -- LIFECYCLE
 --============================================================
 function M:OnInit()
+
+    BasicDB = BasicDB or {}
+    BasicDB.Chat = BasicDB.Chat or {}
+
+    self.db = BasicDB.Chat
+
+    BasicUI:CopyDefaults(self.defaults, self.db)
+
+    fullMovement = self.db.fullMovement
+
 end
 
 function M:OnLoadScreen()
+
+    if not self.db or not self.db.enabled then return end
     -- Ensure global alpha constants are set to numeric values to prevent 'max' nil errors
     _G.CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0.01
     _G.CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0.01
@@ -384,7 +407,86 @@ function M:OnLoadScreen()
         M:ApplyChatStyle()
         M:EnableItemLinkTooltip()
     end)
+	
+	self:UpdateChatFont()	
 end
+
+function M:UpdateChatFont()
+
+    local size = self.db.fontSize
+
+    for i = 1, NUM_CHAT_WINDOWS do
+        local frame = _G["ChatFrame"..i]
+
+        if frame then
+            local font, _, flags = frame:GetFont()
+            frame:SetFont(font, size, flags)
+        end
+    end
+
+    if ChatFrame1EditBox then
+        local font, _, flags = ChatFrame1:GetFont()
+        ChatFrame1EditBox:SetFont(font, size, flags)
+    end
+
+end
+
+--============================================================
+-- OPTIONS
+--============================================================
+local function ChatDisabled()
+    return not M.db.enabled
+end
+
+M.options = {
+    type = "group",
+    name = "Chat",
+    args = {
+
+        enabled = {
+            type = "toggle",
+            name = "Enable Chat Enhancements",
+            desc = "Enable BasicUI improvements for the default chat system.",
+            order = 1,
+			width = "full",
+            get = function() return M.db.enabled end,
+			set = function(_, v)
+				M.db.enabled = v
+				BasicUI:RequestReload()
+			end,
+        },
+
+        fullMovement = {
+            type = "toggle",
+            name = "Allow Full Movement",
+            desc = "Allow chat windows to be moved freely anywhere on the screen instead of being restricted to their default positions.",
+            order = 2,
+			disabled = ChatDisabled,
+            get = function() return M.db.fullMovement end,
+			set = function(_, v)
+				M.db.fullMovement = v
+				fullMovement = v
+				M:ApplyChatStyle()
+			end,
+        },
+		fontSize = {
+			type = "range",
+			name = "Chat Font Size",
+			desc = "Adjust the font size used in chat windows.",
+			min = 8,
+			max = 32,
+			step = 1,
+			order = 3,
+			disabled = ChatDisabled,
+			get = function() return M.db.fontSize end,
+			set = function(_, v)
+				M.db.fontSize = v
+				M:UpdateChatFont()
+			end,
+		},		
+
+    },
+}
 
 --============================================================
 -- REGISTER MODULE

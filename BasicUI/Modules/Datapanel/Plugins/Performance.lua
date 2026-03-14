@@ -1,9 +1,14 @@
---============================================================
+--==============================
 -- PLUGIN: Performance
--- Datapanel version (no Ace3, no options UI)
---============================================================
-local parent = BasicUI:GetModule("Datapanel")
-local M = parent
+--==============================
+
+local Datapanel = BasicUI:GetModule("Datapanel")
+if not Datapanel then return end
+
+local floor = math.floor
+local format = string.format
+local tinsert = table.insert
+local sort = table.sort
 
 local Plugin = {}
 Plugin.name = "performance"
@@ -12,79 +17,99 @@ Plugin.name = "performance"
 -- OnEnable
 --============================================================
 function Plugin:OnEnable()
-    -- Initial refresh after login
-    M:RegisterEvent("PLAYER_ENTERING_WORLD", function() Plugin:Refresh() end)
+
+    Datapanel:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+        self:Refresh()
+    end)
+
 end
 
 --============================================================
 -- Refresh (panel text)
 --============================================================
 function Plugin:Refresh()
+
     if not self.frame then return end
 
-    local fps = math.floor(GetFramerate())
-    local hex = M:GetClassHex()
+    local fps = floor(GetFramerate() or 0)
+    local hex = Datapanel:GetClassHex()
 
-    local text = string.format("|cff%sFPS:|r %d", hex, fps)
-    self.frame.text:SetText(text)
+    self.frame.text:SetText(format("|cff%sFPS:|r %d", hex, fps))
+    self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
+
 end
-
-
 
 --============================================================
 -- Tooltip
 --============================================================
 local function ShowTooltip(self)
+
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     GameTooltip:ClearLines()
 
-    -- Class‑colored header
-    local header = M:GetColoredPlayerHeader("Performance")
+    local header = Datapanel:GetColoredPlayerHeader("Performance")
     GameTooltip:AddLine(header)
 
-    -- FPS
-    local fps = tonumber(GetFramerate()) or 0
-    fps = math.floor(fps)
+    local fps = floor(GetFramerate() or 0)
 
-    -- Latency
     local _, _, home, world = GetNetStats()
-    home  = tonumber(home)  or 0
-    world = tonumber(world) or 0
+    home = home or 0
+    world = world or 0
 
-    -- Yellow titles, white numbers
-    GameTooltip:AddDoubleLine("|cffffff00FPS:|r", "|cffffffff" .. fps .. "|r")
-    GameTooltip:AddDoubleLine("|cffffff00Latency Home:|r", "|cffffffff" .. home .. " ms|r")
-    GameTooltip:AddDoubleLine("|cffffff00Latency World:|r", "|cffffffff" .. world .. " ms|r")
+    GameTooltip:AddDoubleLine("|cffffff00FPS:|r", "|cffffffff"..fps.."|r")
+    GameTooltip:AddDoubleLine("|cffffff00Latency Home:|r", "|cffffffff"..home.." ms|r")
+    GameTooltip:AddDoubleLine("|cffffff00Latency World:|r", "|cffffffff"..world.." ms|r")
+
     GameTooltip:AddLine("|cff666666-------------------------|r")
 
-    -- Memory breakdown
+    --============================================================
+    -- Memory Breakdown
+    --============================================================
+
     UpdateAddOnMemoryUsage()
+
     local total = 0
     local addons = {}
+    local numAddons = GetNumAddOns()
 
-    for i = 1, GetNumAddOns() do
+    for i = 1, numAddons do
+
         if IsAddOnLoaded(i) then
-            local mem = tonumber(GetAddOnMemoryUsage(i)) or 0
+
+            local mem = GetAddOnMemoryUsage(i) or 0
+            local name = GetAddOnInfo(i)
+
             total = total + mem
-            table.insert(addons, { name = GetAddOnInfo(i), mem = mem })
+
+            tinsert(addons, {
+                name = name,
+                mem = mem
+            })
+
         end
+
     end
 
-    table.sort(addons, function(a,b) return a.mem > b.mem end)
+    sort(addons, function(a,b)
+        return a.mem > b.mem
+    end)
 
     GameTooltip:AddDoubleLine(
         "|cffffff00Total AddOn Memory:|r",
-        string.format("|cffffffff%.1f MB|r", total/1024)
+        format("|cffffffff%.1f MB|r", total/1024)
     )
 
     GameTooltip:AddLine(" ")
 
     for i = 1, math.min(15, #addons) do
+
         local a = addons[i]
+
         GameTooltip:AddDoubleLine(
-            "|cffffffff" .. a.name .. "|r",
-            string.format("|cffffffff%.1f MB|r", a.mem/1024)
+            "|cffffffff"..(a.name or "Unknown").."|r",
+            format("|cffffffff%.1f MB|r", a.mem/1024)
         )
+
     end
 
     if #addons > 15 then
@@ -95,46 +120,55 @@ local function ShowTooltip(self)
     GameTooltip:AddLine("|cff00ff00<Left-Click to Force Garbage Collection>|r")
 
     GameTooltip:Show()
+
 end
 
 --============================================================
 -- CreateFrame
 --============================================================
 function Plugin:CreateFrame(parent)
+
     local f = CreateFrame("Button", nil, parent)
+
     f:SetHeight(20)
     f:EnableMouse(true)
     f:RegisterForClicks("LeftButtonUp")
 
     f.text = f:CreateFontString(nil, "OVERLAY")
-    M:ApplyStandardFont(f.text)
+    Datapanel:ApplyStandardFont(f.text)
 
-    -- Correct centering inside the plugin slot
-    f.text:ClearAllPoints()
-    f.text:SetPoint("CENTER", f, "CENTER")
+    f.text:SetPoint("CENTER")
 
     f:SetScript("OnEnter", ShowTooltip)
-    f:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f:SetScript("OnLeave", GameTooltip_Hide)
 
     f:SetScript("OnClick", function()
         collectgarbage("collect")
-        Plugin:Refresh()
+        self:Refresh()
     end)
 
-    f:SetScript("OnUpdate", function(self, elapsed)
-        self.timer = (self.timer or 0) + elapsed
-        if self.timer > 1 then
+    f:SetScript("OnUpdate", function(selfFrame, elapsed)
+
+        selfFrame.timer = (selfFrame.timer or 0) + elapsed
+
+        if selfFrame.timer >= 1 then
+
             Plugin:Refresh()
-            self.timer = 0
+
+            selfFrame.timer = 0
+
         end
+
     end)
 
     self.frame = f
     self:Refresh()
+
     return f
+
 end
 
 --============================================================
 -- Register plugin
 --============================================================
-M:RegisterPlugin("performance", Plugin)
+Datapanel:RegisterPlugin("performance", Plugin)
