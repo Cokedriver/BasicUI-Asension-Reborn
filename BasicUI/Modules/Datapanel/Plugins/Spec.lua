@@ -101,7 +101,7 @@ function Plugin:Refresh()
     if not self.frame then return end
 
     local specName = GetPlayerSpec()
-    local labelColor = Datapanel:GetClassHex()
+    local labelColor = BasicUI:GetClassHex()
 
     local text = string.format("|cff%sSpec:|r |cffffffff%s|r", labelColor, specName)
 
@@ -118,7 +118,7 @@ local function ShowTooltip(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     GameTooltip:ClearLines()
 
-    local header = Datapanel:GetColoredPlayerHeader("Character Specialization")
+    local header = Datapanel:GetColoredPlayerHeader("Spec")
 
     GameTooltip:AddLine(header)
     GameTooltip:AddLine(" ")

@@ -64,6 +64,7 @@ end
 function M:UpdateFrameScales()
 
 	if not self.db or not self.db.enabled then return end
+	if InCombatLockdown() then return end
 
     local db = self.db	
 
@@ -211,6 +212,13 @@ end
 
 M:RegisterEvent("ADDON_LOADED")
 M:RegisterEvent("PLAYER_ENTERING_WORLD")
+M:RegisterEvent("UNIT_ENTERED_VEHICLE")
+M:RegisterEvent("UNIT_EXITED_VEHICLE")
+M:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+M:RegisterEvent("PLAYER_REGEN_ENABLED")
+M:RegisterEvent("UNIT_FACTION")
+M:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+M:RegisterEvent("PLAYER_TARGET_CHANGED")
 
 M:SetScript("OnEvent", function(self, event, ...)
 
@@ -218,25 +226,24 @@ M:SetScript("OnEvent", function(self, event, ...)
 
         local addon = ...
 
-		if addon == "BasicUI" then
+        if addon == "BasicUI" then
 
-			BasicDB = BasicDB or {}
-			BasicDB.Unitframes = BasicDB.Unitframes or {}
+            BasicDB = BasicDB or {}
+            BasicDB.Unitframes = BasicDB.Unitframes or {}
 
-			self.db = BasicDB.Unitframes
+            self.db = BasicDB.Unitframes
 
-			BasicUI:CopyDefaults(self.defaults, self.db)
+            BasicUI:CopyDefaults(self.defaults, self.db)
 
-			if not self.db.enabled then
-				return
-			end
+            if not self.db.enabled then
+                return
+            end
 
             if self.db.hideHitText then
                 PlayerHitIndicator:Hide()
                 PetHitIndicator:Hide()
                 PlayerHitIndicator.Show = function() end
                 PetHitIndicator.Show = function() end
-                CombatText_UpdateUnitModel = function() end
             end
 
             StyleDefaultCastbar(self)
@@ -245,19 +252,52 @@ M:SetScript("OnEvent", function(self, event, ...)
                 if f then self:ApplyAllStyling(f) end
             end)
 
-            hooksecurefunc("UnitFrameHealthBar_Update", function(s)
-                if s and s:GetParent() then
-                    self:ApplyAllStyling(s:GetParent())
+            -- Force target HP display
+            hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
+
+                if bar and bar:GetParent() == TargetFrame then
+
+                    local hp = UnitHealth("target")
+                    local maxhp = UnitHealthMax("target")
+
+                    if TargetFrameHealthBar and TargetFrameHealthBar.TextString then
+                        TargetFrameHealthBar.TextString:SetFormattedText("%d / %d", hp, maxhp)
+                    end
+
                 end
+
+            end)
+
+            hooksecurefunc("UnitFrameManaBar_Update", function(bar)
+
+                if bar and bar:GetParent() == TargetFrame then
+
+                    local mp = UnitPower("target")
+                    local maxmp = UnitPowerMax("target")
+
+                    if TargetFrameManaBar and TargetFrameManaBar.TextString then
+                        TargetFrameManaBar.TextString:SetFormattedText("%d / %d", mp, maxmp)
+                    end
+
+                end
+
             end)
 
             hooksecurefunc("TargetFrame_CheckClassification", function(f)
                 if f then self:ApplyAllStyling(f) end
             end)
 
-            -- FIXED HERE
             hooksecurefunc("PartyMemberFrame_UpdateMember", function(frame)
                 if frame then self:ApplyAllStyling(frame) end
+            end)
+
+            -- Vehicle reset protection
+            hooksecurefunc("PlayerFrame_ToPlayerArt", function()
+                C_Timer.After(0.1, function()
+                    if M then
+                        M:UpdateFrameScales()
+                    end
+                end)
             end)
 
         elseif addon == "Blizzard_ArenaUI" then
@@ -269,11 +309,28 @@ M:SetScript("OnEvent", function(self, event, ...)
 
         end
 
-    elseif event == "PLAYER_ENTERING_WORLD" then
-	
-		if not self.db or not self.db.enabled then return end
-		
-        self:UpdateFrameScales()
+
+    elseif event == "UNIT_FACTION"
+    or event == "UNIT_THREAT_LIST_UPDATE"
+    or event == "PLAYER_TARGET_CHANGED" then
+
+        if not self.db or not self.db.enabled then return end
+
+        self:ApplyAllStyling(TargetFrame)
+
+
+    elseif event == "PLAYER_ENTERING_WORLD"
+    or event == "UNIT_ENTERED_VEHICLE"
+    or event == "UNIT_EXITED_VEHICLE"
+    or event == "UPDATE_BONUS_ACTIONBAR"
+    or event == "PLAYER_REGEN_ENABLED" then
+
+        if not self.db or not self.db.enabled then return end
+
+        C_Timer.After(0.1, function()
+            M:UpdateFrameScales()
+        end)
+
     end
 
 end)

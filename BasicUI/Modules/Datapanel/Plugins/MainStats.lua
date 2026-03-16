@@ -177,7 +177,7 @@ function Plugin:Refresh()
     firstStat = firstStat and firstStat:gsub("%s+","") or "N/A"
 
     local label,value = GetStatValue(firstStat)
-    local hex = Datapanel:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     self.frame.text:SetText("|cff"..hex..label..":|r "..tostring(value))
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
@@ -242,7 +242,7 @@ local function ShowTooltip(self)
     local role = GetRoleFromSpec(spec)
     local priority = SPEC_PRIORITY[spec] or "N/A"
 
-    GameTooltip:AddLine(Datapanel:GetColoredPlayerHeader("Main Stats"))
+    GameTooltip:AddLine(Datapanel:GetColoredPlayerHeader("Stats"))
     GameTooltip:AddLine(" ")
 
     GameTooltip:AddLine("|cffffd100Stat Priority Order|r")

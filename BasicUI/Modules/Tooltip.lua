@@ -269,7 +269,7 @@ local function AddMouseoverTarget(self, unit)
     }
 
     if name == UnitName("player") then
-        self:AddLine('|cffFFFF00Target|r: |cffff0000** YOU **|r')
+        self:AddLine('|cffFFFF00Target|r: |cff00BFFF** YOU **|r')
     else
         if UnitIsPlayer(target) then
             self:AddLine(format('|cffFFFF00Target|r: |cff%02x%02x%02x%s|r',

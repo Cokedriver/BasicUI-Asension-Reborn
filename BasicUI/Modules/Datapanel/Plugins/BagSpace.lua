@@ -190,7 +190,7 @@ function Plugin:Refresh()
         numColor = "ffffff"
     end
 
-    local classHex = Datapanel:GetClassHex()
+    local classHex = BasicUI:GetClassHex()
 
     local text = string.format(
         "|cff%sBags:|r |cff%s%d/%d|r",

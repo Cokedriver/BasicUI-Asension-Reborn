@@ -32,7 +32,7 @@ function Plugin:Refresh()
     if not self.frame then return end
 
     local fps = floor(GetFramerate() or 0)
-    local hex = Datapanel:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     self.frame.text:SetText(format("|cff%sFPS:|r %d", hex, fps))
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)

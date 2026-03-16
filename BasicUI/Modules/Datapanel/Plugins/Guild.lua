@@ -37,7 +37,7 @@ function Plugin:Refresh()
 
     if not IsInGuild() then
 
-        self.frame.text:SetText("|cff"..Datapanel:GetClassHex().."No Guild|r")
+        self.frame.text:SetText("|cff"..BasicUI:GetClassHex().."No Guild|r")
         self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
         return
 
@@ -55,7 +55,7 @@ function Plugin:Refresh()
         end
     end
 
-    local hex = Datapanel:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     self.frame.text:SetText("|cff"..hex.."Guild:|r "..online)
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)

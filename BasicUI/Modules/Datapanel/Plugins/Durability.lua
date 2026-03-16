@@ -69,7 +69,7 @@ function Plugin:Refresh()
 
     end
 
-    local classHex = Datapanel:GetClassHex()
+    local classHex = BasicUI:GetClassHex()
     local display = ""
 
     if wearingHeirloom and lowest == 100 then

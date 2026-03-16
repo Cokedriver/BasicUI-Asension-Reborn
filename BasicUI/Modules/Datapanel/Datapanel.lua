@@ -174,6 +174,8 @@ function M:OnEnable()
 
 	self:UpdatePanel()
 	self:StartRefreshEngine()
+	--self:ApplyTooltipFont()
+	--self:ApplyEasyMenuFont()
 
 	GameTooltip:HookScript("OnEnter", function(self)
 		if self == GameTooltip then
@@ -182,7 +184,7 @@ function M:OnEnable()
 	end)
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", function()
-		if self.db.enabled then
+		if M.db and M.db.enabled then
 			C_Timer.After(0.1, function()
 				self:DockMainMenuBar()
 			end)
@@ -242,25 +244,16 @@ end
 function M:StartRefreshEngine()
 
     local frame = CreateFrame("Frame")
-
     frame:SetScript("OnUpdate", function(_, elapsed)
-
         for _, r in ipairs(self.refreshers) do
-
             r.timer = r.timer + elapsed
-
             if r.timer >= r.interval then
-
                 if r.plugin.Refresh then
                     r.plugin:Refresh()
                 end
-
                 r.timer = 0
-
             end
-
         end
-
     end)
 
 end
@@ -328,6 +321,8 @@ end
 function M:DockMainMenuBar()
 
     if not MainMenuBar or not self.panel then return end
+
+    if InCombatLockdown() then return end
 
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", self.panel, "TOP", 0, -2)
@@ -418,7 +413,7 @@ end
 function M:GetColoredPlayerHeader(pluginName)
 
     local name = UnitName("player")
-    local hex = self:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     return "|cff"..hex..name.."'s "..pluginName.."|r"
 

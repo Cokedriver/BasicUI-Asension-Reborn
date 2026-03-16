@@ -81,7 +81,7 @@ function Plugin:Refresh()
 
     DetectPrimaryProfessions()
 
-    local hex = Datapanel:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     self.frame.text:SetText(string.format("|cff%sProfessions|r", hex))
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)

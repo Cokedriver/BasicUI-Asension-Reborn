@@ -13,7 +13,6 @@ local M = {}
 
 M.defaults = {
     enabled = true,
-    baseSize = 15,
     chatSize = 16,
 }
 
@@ -77,60 +76,86 @@ function M:ApplyAllFonts()
 
     if not self.db.enabled then return end
 
-    local s = self.db.baseSize
-    local N = BASICFONT["N"]
-    local B = BASICFONT["B"]
-
     ------------------------------------------------------------
     -- SYSTEM FONTS
     ------------------------------------------------------------
 
-    SetFont(_G.SystemFont_Tiny, N, s-4)
-    SetFont(_G.SystemFont_Small, N, s-2)
-    SetFont(_G.SystemFont_Outline_Small, N, s-2, "OUTLINE")
-    SetFont(_G.SystemFont_Outline, N, s)
-    SetFont(_G.SystemFont_Shadow_Small, N, s-2)
-    SetFont(_G.SystemFont_InverseShadow_Small, N, s-2)
-    SetFont(_G.SystemFont_Med1, N, s)
-    SetFont(_G.SystemFont_Shadow_Med1, N, s)
-    SetFont(_G.SystemFont_Med2, N, s, nil, 0.15, 0.09, 0.04)
-    SetFont(_G.SystemFont_Shadow_Med2, N, s)
-    SetFont(_G.SystemFont_Med3, N, s)
-    SetFont(_G.SystemFont_Shadow_Med3, N, s)
-    SetFont(_G.SystemFont_Large, B, s+2)
-    SetFont(_G.SystemFont_Shadow_Large, B, s+2)
-    SetFont(_G.SystemFont_Huge1, B, s+5)
-    SetFont(_G.SystemFont_Shadow_Huge1, B, s+5)
-    SetFont(_G.SystemFont_OutlineThick_Huge2, B, s+7, "THICKOUTLINE")
-    SetFont(_G.SystemFont_Shadow_Outline_Huge2, B, s+7, "OUTLINE")
-    SetFont(_G.SystemFont_Shadow_Huge3, B, s+10)
-    SetFont(_G.SystemFont_OutlineThick_Huge4, B, s+11, "THICKOUTLINE")
-    SetFont(_G.SystemFont_OutlineThick_WTF, B, s+17, "THICKOUTLINE", nil, nil, nil, 0,0,0,1,-1)
+	_G.UIDROPDOWNMENU_DEFAULT_TEXT_HEIGHT = 14
 
-    SetFont(_G.GameTooltipHeader, B, s+3)
+	local FONTZ = true -- Set to true only if you have not changed your master fonts.
 
-    SetFont(_G.SpellFont_Small, N, s-2)
-    SetFont(_G.InvoiceFont_Med, N, s, nil, 0.15, 0.09, 0.04)
-    SetFont(_G.InvoiceFont_Small, N, s-2, nil, 0.15, 0.09, 0.04)
+	if FONTZ == true then
+		UNIT_NAME_FONT     			= BASICFONT["N"]
+		DAMAGE_TEXT_FONT   			= BASICFONT["N"]
+		STANDARD_TEXT_FONT			= BASICFONT["N"]
+		NAMEPLATE_SPELLCAST_FONT    = BASICFONT["N"]
+	end
 
-    SetFont(_G.Tooltip_Med, N, s)
-    SetFont(_G.Tooltip_Small, N, s-2)
 
-    SetFont(_G.AchievementFont_Small, N, s-2)
-    SetFont(_G.ReputationDetailFont, N, s-3, nil, nil,nil,nil,0,0,0,1,-1)
+	-- Font Normally Used FRIZQT__.TTF
+	SetFont(_G.SystemFont_Tiny,                		BASICFONT["N"], 11);
+	SetFont(_G.SystemFont_Small,                	BASICFONT["N"], 13);
+	SetFont(_G.SystemFont_Outline_Small,           	BASICFONT["N"], 13, "OUTLINE");
+	SetFont(_G.SystemFont_Outline,                	BASICFONT["N"], 15);	-- Pet level on World map
+	SetFont(_G.SystemFont_Shadow_Small,            	BASICFONT["N"], 13);
+	SetFont(_G.SystemFont_InverseShadow_Small,		BASICFONT["N"], 13);
+	SetFont(_G.SystemFont_Med1,                		BASICFONT["N"], 15);
+	SetFont(_G.SystemFont_Shadow_Med1,             	BASICFONT["N"], 15);
+	SetFont(_G.SystemFont_Med2,                		BASICFONT["N"], 15, nil, 0.15, 0.09, 0.04);
+	SetFont(_G.SystemFont_Shadow_Med2,             	BASICFONT["N"], 15);
+	SetFont(_G.SystemFont_Med3,                		BASICFONT["N"], 15);
+	SetFont(_G.SystemFont_Shadow_Med3,             	BASICFONT["N"], 15);
+	SetFont(_G.SystemFont_Large,                	BASICFONT["N"], 17);
+	SetFont(_G.SystemFont_Shadow_Large,            	BASICFONT["N"], 17);
+	SetFont(_G.SystemFont_Huge1,                	BASICFONT["N"], 20);
+	SetFont(_G.SystemFont_Shadow_Huge1,            	BASICFONT["N"], 20);
+	SetFont(_G.SystemFont_OutlineThick_Huge2,      	BASICFONT["N"], 22, "THICKOUTLINE");
+	SetFont(_G.SystemFont_Shadow_Outline_Huge2,    	BASICFONT["N"], 22, "OUTLINE");
+	SetFont(_G.SystemFont_Shadow_Huge3,            	BASICFONT["N"], 25);
+	SetFont(_G.SystemFont_OutlineThick_Huge4,      	BASICFONT["N"], 26, "THICKOUTLINE");
+	SetFont(_G.SystemFont_OutlineThick_WTF,        	BASICFONT["N"], 32, "THICKOUTLINE");	-- World Map
+	SetFont(_G.SubZoneTextFont,						BASICFONT["N"], 26, "OUTLINE");			-- World Map(SubZone)
+	SetFont(_G.GameTooltipHeader,                	BASICFONT["B"], 18);
+	SetFont(_G.SpellFont_Small,                		BASICFONT["N"], 13);
+	SetFont(_G.InvoiceFont_Med,                		BASICFONT["N"], 15, nil, 0.15, 0.09, 0.04);
+	SetFont(_G.InvoiceFont_Small,                	BASICFONT["N"], 13, nil, 0.15, 0.09, 0.04);
+	SetFont(_G.Tooltip_Med,                			BASICFONT["N"], 15);
+	SetFont(_G.Tooltip_Small,                		BASICFONT["N"], 13);
+	SetFont(_G.AchievementFont_Small,              	BASICFONT["N"], 13);
+	SetFont(_G.ReputationDetailFont,               	BASICFONT["N"], 12, nil, nil, nil, nil, 0, 0, 0, 1, -1);
+	SetFont(_G.GameFont_Gigantic,                	BASICFONT["N"], 32, nil, nil, nil, nil, 0, 0, 0, 1, -1);
 
-    SetFont(_G.GameFont_Gigantic, B, s+17, nil,nil,nil,nil,0,0,0,1,-1)
+	-- Font Normally Used ARIALN.TTF
+	SetFont(_G.NumberFont_Shadow_Small,				BASICFONT["N"], 13);
+	SetFont(_G.NumberFont_OutlineThick_Mono_Small,	BASICFONT["N"], 13, "OUTLINE");
+	SetFont(_G.NumberFont_Shadow_Med,              	BASICFONT["N"], 15);
+	SetFont(_G.NumberFont_Outline_Med,             	BASICFONT["N"], 15, "OUTLINE");
+	SetFont(_G.NumberFont_Outline_Large,           	BASICFONT["N"], 17, "OUTLINE");
+	SetFont(_G.NumberFont_GameNormal,				BASICFONT["N"], 13);
+	SetFont(_G.FriendsFont_UserText,               	BASICFONT["N"], 15);
 
-    ------------------------------------------------------------
-    -- CHAT WINDOWS
-    ------------------------------------------------------------
+	-- Font Normally Used skurri.ttf
+	SetFont(_G.NumberFont_Outline_Huge,            	BASICFONT["N"], 30, "THICKOUTLINE");
 
-    for i = 1, NUM_CHAT_WINDOWS do
-        local chat = _G["ChatFrame"..i]
-        if chat then
-            chat:SetFont(N, self.db.chatSize, "")
-        end
-    end
+	-- Font Normally Used MORPHEUS.ttf
+	SetFont(_G.QuestFont_Large,                		BASICFONT["N"], 17)
+	SetFont(_G.QuestFont_Shadow_Huge,             	BASICFONT["N"], 18, nil, nil, nil, nil, 0.54, 0.4, 0.1);
+	SetFont(_G.QuestFont_Shadow_Small,             	BASICFONT["N"], 13)
+	SetFont(_G.MailFont_Large,                		BASICFONT["N"], 17, nil, 0.15, 0.09, 0.04, 0.54, 0.4, 0.1, 1, -1);
+
+	-- Font Normally Used FRIENDS.TTF
+	SetFont(_G.FriendsFont_Normal,                	BASICFONT["N"], 15, nil, nil, nil, nil, 0, 0, 0, 1, -1);
+	SetFont(_G.FriendsFont_Small,                	BASICFONT["N"], 13, nil, nil, nil, nil, 0, 0, 0, 1, -1);
+	SetFont(_G.FriendsFont_Large,                	BASICFONT["N"], 17, nil, nil, nil, nil, 0, 0, 0, 1, -1);
+
+	-- Font Normally Used DAMAGE.TTF
+	SetFont(_G.GameFontNormalSmall,                	BASICFONT["N"], 13);
+	SetFont(_G.GameFontNormal,                		BASICFONT["N"], 15);
+	SetFont(_G.GameFontNormalLarge,                	BASICFONT["N"], 17);
+	SetFont(_G.GameFontNormalHuge,                	BASICFONT["N"], 20);
+	SetFont(_G.GameFontHighlightSmallLeft,			BASICFONT["N"], 15);
+	SetFont(_G.GameNormalNumberFont,               	BASICFONT["N"], 13);
+
 
     ------------------------------------------------------------
     -- WATCHFRAME
@@ -139,13 +164,13 @@ function M:ApplyAllFonts()
     local function SetWatchFrameFonts()
 
         if WatchFrameTitle then
-            SetFont(WatchFrameTitle, B, 15)
+            SetFont(WatchFrameTitle, BASICFONT["B"], 16)
         end
 
         for i = 1, 50 do
             local line = _G["WatchFrameLine"..i]
             if line and line.text then
-                SetFont(line.text, N, 15)
+                SetFont(line.text, BASICFONT["N"], 15)
             end
         end
 
@@ -208,21 +233,6 @@ M.options = {
 			set = function(_, v)
 				M.db.enabled = v
 				BasicUI:RequestReload()
-			end,
-        },
-
-        baseSize = {
-            type = "range",
-            name = "Base Font Size",
-            desc = "Adjust the primary font size used throughout the interface.",
-            min = 8,
-            max = 32,
-            step = 1,
-            order = 2,
-            get = function() return M.db.baseSize end,
-			set = function(_, v)
-				M.db.baseSize = v
-				M:ApplyAllFonts()
 			end,
         },
 

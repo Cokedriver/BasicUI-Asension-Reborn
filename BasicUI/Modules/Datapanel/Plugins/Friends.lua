@@ -151,7 +151,7 @@ function Plugin:Refresh()
     end
 
     local online = CountFriendsOnline()
-    local hex = Datapanel:GetClassHex()
+    local hex = BasicUI:GetClassHex()
 
     self.frame.text:SetText("|cff"..hex.."Friends:|r "..online)
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
