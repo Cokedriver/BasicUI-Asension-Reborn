@@ -66,7 +66,7 @@ BasicUI is designed with **Project Ascension Reborn** in mind:
 1. Download or clone:
 
    ```
-   [https://github.com/Cokedriver/BasicUI-Asension-Reborn.git](https://github.com/Cokedriver/BasicUI-Asension-Reborn.git)
+   https://github.com/Cokedriver/BasicUI-Asension-Reborn.git
    ```
 
 2. Place in:
