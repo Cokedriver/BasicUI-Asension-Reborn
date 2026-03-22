@@ -1,143 +1,263 @@
 ![My Screenshot](BasicUI/Screenshots/BasicUI%20Main%20Screenshot.jpg)
 
-# BasicUI – Ascension Reborn
 
-A lightweight, modular interface enhancement designed specifically for Ascension Reborn.
+# BasicUI
 
-BasicUI refines the default World of Warcraft interface with improved clarity, spacing, and layout consistency — while preserving the core Ascension experience.
+**BasicUI** is a modular UI overhaul built specifically for
+**Project Ascension: Reborn (Wrath 3.3.5 client)**
 
----
-
-## Overview
-
-BasicUI focuses on:
-
-- Clean layout structure  
-- Improved text alignment and spacing  
-- Lightweight performance footprint  
-- Modular architecture  
-- Minimal visual clutter  
-
-This addon is built for players who want a polished UI without unnecessary complexity.
+Designed to complement Ascension’s classless gameplay, BasicUI enhances clarity, reduces clutter, and provides powerful quality-of-life improvements while keeping the Blizzard feel intact.
 
 ---
 
-## Features
+## 🧩 Built for Ascension
 
-### Interface Improvements
-- Refined layout alignment
-- Consistent spacing across UI elements
-- Improved font rendering
-- Cleaner visual hierarchy
+BasicUI is designed with **Project Ascension Reborn** in mind:
 
-### Datapanel System
-- Modular stat positioning
-- Configurable display slots
-- Tooltip integration
-- Optional currency display support
-
-### Quest Log Enhancements
-- Fixed overlapping elements
-- Improved title alignment
-- Play button positioning adjustments
-- Cleaner formatting
-
-### Modular Structure
-- Individual modules can be enabled or disabled
-- Clean file organization
-- Easily extendable codebase
-- Built for future expansion
+* Supports dynamic builds and frequent spec changes
+* Enhances visibility for proc-based and hybrid gameplay
+* Keeps UI responsive during fast-paced combat
+* Lightweight and performance-friendly
 
 ---
 
-## Installation
+## ✨ Features
 
-1. Download or clone this repository.
-2. Place the `BasicUI` folder into:
+### 🎯 Clean Core UI
 
-   World of Warcraft/_classic_/Interface/AddOns/
+* Minimal, modernized Blizzard-style interface
+* Consistent spacing, fonts, and layout
+* Improved readability across all elements
 
-3. Ensure the folder structure looks like:
+### 🧱 Modular Architecture
 
-   AddOns/
-   └── BasicUI/
-       ├── BasicUI.toc
-       ├── Modules/
-       ├── Media/
-       └── ...
+* Fully modular system
+* Enable or disable features individually
+* Easy to expand and maintain
 
-4. Restart the game or use:
+### ⚙️ In-Game Configuration
 
-   /reload
+* Full settings menu powered by Ace3
+* No need to edit Lua files
+* Toggle modules and features live
 
----
+**Access settings with:**
 
-## Configuration
-
-If enabled, access configuration with:
-
+```
 /basicui
+```
 
-or
+### 📊 Datapanel System
 
-/bui
+* Top-anchored information bar
+* Plugin-based design
+* Real-time tracking for stats and utilities
 
-BasicUI is designed to work out of the box with minimal setup.
+### ⚙️ Quality of Life (QoL)
 
----
-
-## Compatibility
-
-Designed specifically for Ascension Reborn.
-
-Compatibility with other large UI overhaul addons is not guaranteed.
-
----
-
-## Design Philosophy
-
-BasicUI is built on three principles:
-
-- Clarity over flash
-- Performance over excess
-- Modularity over monolithic design
+* Automation systems
+* UI behavior improvements
+* Reduced gameplay friction
 
 ---
 
-## Roadmap
+## 📦 Installation
 
-Planned improvements include:
+1. Download or clone:
 
-- Expanded configuration panel
-- Additional datapanel modules
-- Improved tooltip styling
-- Optional minimalist mode
-- Extended customization options
+   ```
+   git clone https://github.com/Cokedriver/BasicUI-Asension-Reborn.git
+   ```
 
----
+2. Place in:
 
-## Contributing
+   ```
+   Ascension Launcher\resources\client\Interface\AddOns
+   ```
 
-Contributions, suggestions, and pull requests are welcome.
+3. Folder name must be:
 
-When submitting changes:
-- Keep code modular
-- Maintain performance awareness
-- Follow existing formatting conventions
+   ```
+   BasicUI
+   ```
 
----
-
-## Reporting Issues
-
-When reporting a bug, please include:
-
-- Description of the issue
-- Steps to reproduce
-- Lua error messages (if any)
-- Screenshots if applicable
+4. Enable in-game AddOns menu
 
 ---
 
-## License
+## 🧱 Project Structure
 
-All rights reserved unless otherwise specified.
+```id="struct2"
+BasicUI/
+│
+├── Core/
+│   ├── Core.lua
+│   └── API.lua
+│
+├── Modules/
+│   ├── Fonts.lua
+│   ├── ActionBars.lua
+│   ├── Buffs.lua
+│   ├── Chat.lua
+│   ├── Tooltip.lua
+│   ├── Unitframes.lua
+│   │
+│   ├── Datapanel/
+│   │   ├── Datapanel.lua
+│   │   └── Plugins/
+│   │       ├── BagSpace.lua
+│   │       ├── Durability.lua
+│   │       ├── Friends.lua
+│   │       ├── Guild.lua
+│   │       ├── Spec.lua
+│   │       ├── Professions.lua
+│   │       ├── Performance.lua
+│   │       └── MainStats.lua
+│   │
+│   └── QoL/
+│       ├── QoL.lua
+│       └── SubModules/
+│           ├── Automation.lua
+│           ├── AutoGreed.lua
+│           ├── AltBuy.lua
+│           ├── DoubleTradeSkill.lua
+│           ├── MapCoords.lua
+│           ├── Minimap.lua
+│           └── Notifications.lua
+│
+├── Libs/ (Ace3)
+└── BasicUI.toc
+```
+
+---
+
+## 🔌 Modules
+
+### 🎮 ActionBars
+
+* Clean layout for ability-heavy builds
+* Improved usability and visibility
+
+### 🧙 Unitframes
+
+* Clear health/resource tracking
+* Optimized for hybrid gameplay
+
+### 💬 Chat
+
+* Simplified and readable
+* Reduced clutter
+
+### 🧰 Tooltip
+
+* Clean and structured information display
+
+### 🧪 Buffs
+
+* Better aura visibility and tracking
+
+### 🎨 Fonts
+
+* Unified font system across UI
+
+---
+
+## 📊 Datapanel Plugins
+
+* **BagSpace** – Inventory tracking
+* **Durability** – Gear condition
+* **Friends** – Social tracking
+* **Guild** – Guild status
+* **Spec** – Build awareness
+* **Professions** – Skill tracking
+* **Performance** – FPS / latency
+* **MainStats** – Core stat overview
+
+---
+
+## ⚙️ QoL SubModules
+
+* **Automation** – General automation
+* **AutoGreed** – Faster loot rolling
+* **AltBuy** – Vendor shortcuts
+* **DoubleTradeSkill** – Faster crafting
+* **MapCoords** – Coordinate display
+* **Minimap** – Map customization
+* **Notifications** – Alerts and feedback
+
+---
+
+## 📚 Dependencies
+
+Included libraries:
+
+* AceGUI-3.0
+* AceConfig-3.0
+* AceEvent-3.0
+* AceHook-3.0
+* AceSerializer-3.0
+
+No external setup required.
+
+---
+
+## 🧪 Development Status
+
+> ⚠️ Active development (Ascension-focused)
+
+* Features are actively evolving
+* QoL and Map systems are still being refined
+* Frequent updates expected
+
+---
+
+## 🐛 Known Issues
+
+* Map fog/overlay conflicts in some zones
+* Datapanel anchor issues after zoning
+* Minor inconsistencies between modules
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome:
+
+1. Fork the repo
+2. Create a branch
+3. Submit a pull request
+
+---
+
+## 🎯 Goals
+
+* Keep the UI lightweight and responsive
+* Improve clarity for Ascension gameplay
+* Maintain Blizzard-style feel
+* Stay modular and extensible
+
+---
+
+## 📜 License
+
+MIT License
+
+---
+
+## 🙌 Credits
+
+* Blizzard Entertainment
+* Ace3 framework
+* Project Ascension Reborn community
+
+---
+
+## 💬 Final Notes
+
+BasicUI is built for the unique nature of Ascension:
+
+* Hybrid builds
+* Proc-heavy combat
+* Frequent respecs
+
+With full **in-game configuration**, you can tailor the UI to your playstyle without touching code.
