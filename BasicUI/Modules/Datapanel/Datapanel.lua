@@ -321,8 +321,15 @@ end
 function M:DockMainMenuBar()
 
     if not MainMenuBar or not self.panel then return end
-
     if InCombatLockdown() then return end
+
+    -- 🔑 THIS IS THE FIX
+    MainMenuBar.ignoreFramePositionManager = true
+
+    -- Optional (covers more cases depending on client)
+    if OverrideActionBar then
+        OverrideActionBar.ignoreFramePositionManager = true
+    end
 
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", self.panel, "TOP", 0, -2)

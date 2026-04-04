@@ -32,18 +32,19 @@ M.defaults = {
 
     enabled = true,
 
-    enableAutomation   = true,
-    enableAutoGreed    = true,
-    enableAltBuy       = true,
+    enableAutomation   	= true,
+    enableAutoGreed    	= true,
+    enableAltBuy       	= true,
 
-    enableMinimap      = true,
-    enableTradeSkill   = true,
+    enableMinimap      	= true,
+    enableTradeSkill   	= true,
 
     enableNotifications = true,
 
-    enableMapCoords    = true,
-    showPlayerCoords   = true,
-    showCursorCoords   = true,
+    enableMapCoords    	= true,
+	enableWorldMapFog 	= true,
+    showPlayerCoords   	= true,
+    showCursorCoords   	= true,
 
     enableZoneTextMove      = true,
     enableZoneTextAnimation = true,
@@ -343,13 +344,25 @@ M.options = {
                         BasicUI:RefreshModule(M)
                     end,
                 },
+				
+				enableWorldMapFog = {
+					type = "toggle",
+					name = "Darken Undiscovered Map",
+					desc = "Darkens unexplored areas of the world map for better visibility.",
+
+					get = function() return M.db.enableWorldMapFog end,
+					set = function(_, v)
+						M.db.enableWorldMapFog = v
+						BasicUI:RefreshModule(M)
+					end,
+				},
 
                 showPlayerCoords = {
                     type = "toggle",
                     name = "Show Player Coordinates",
                     desc = "Display your character's current map coordinates.",
-
-                    get = function() return M.db.showPlayerCoords end,
+					
+					get = function() return M.db.showPlayerCoords end,
                     set = function(_, v)
                         M.db.showPlayerCoords = v
                         BasicUI:RefreshModule(M)

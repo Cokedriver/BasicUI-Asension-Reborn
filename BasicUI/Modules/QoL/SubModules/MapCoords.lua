@@ -145,8 +145,8 @@ BasicUI_QoL_RegisterModule("MapCoords", {
 		self.core = M
 
 		self:CreateCoordsFrame()
-		self:CreateMapEvents()
-		self:ApplyPlayerIconScale()
+		--self:CreateMapEvents()
+		--self:ApplyPlayerIconScale()
 
 		if self.frame then
 			self.frame:Show()

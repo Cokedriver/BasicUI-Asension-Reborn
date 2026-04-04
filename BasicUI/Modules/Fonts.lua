@@ -13,7 +13,7 @@ local M = {}
 
 M.defaults = {
     enabled = true,
-    chatSize = 16,
+    --chatSize = 16,
 }
 
 --============================================================
@@ -233,21 +233,6 @@ M.options = {
 			set = function(_, v)
 				M.db.enabled = v
 				BasicUI:RequestReload()
-			end,
-        },
-
-        chatSize = {
-            type = "range",
-            name = "Chat Font Size",
-            desc = "Adjust the font size used in chat windows.",
-            min = 8,
-            max = 32,
-            step = 1,
-            order = 3,
-            get = function() return M.db.chatSize end,
-			set = function(_, v)
-				M.db.chatSize = v
-				M:ApplyAllFonts()
 			end,
         },
 

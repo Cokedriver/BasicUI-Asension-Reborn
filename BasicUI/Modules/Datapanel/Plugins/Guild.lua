@@ -100,7 +100,8 @@ local function ShowTooltip(self)
 
     for i = 1, total do
 
-        local name, _, _, level, classLoc, zone, _, _, connected, status, classFile =
+        -- ADDED note + officernote
+        local name, _, _, level, classLoc, zone, note, officernote, connected, status, classFile =
             GetGuildRosterInfo(i)
 
         if connected and name then
@@ -127,13 +128,28 @@ local function ShowTooltip(self)
                 status or ""
             )
 
-            GameTooltip:AddDoubleLine(left, zone or "Unknown", 1,1,1, 0.7,0.7,0.7)
+            -- DEFAULT = zone
+            local right = zone or "Unknown"
+
+            -- SHIFT = show notes
+            if IsShiftKeyDown() then
+                if note and note ~= "" then
+                    right = note
+                elseif officernote and officernote ~= "" then
+                    right = officernote
+                else
+                    right = "No Note"
+                end
+            end
+
+            GameTooltip:AddDoubleLine(left, right, 1,1,1, 0.7,0.7,0.7)
 
         end
 
     end
 
     GameTooltip:AddLine(" ")
+    GameTooltip:AddLine("|cffaaaaaaHold Shift to show notes|r") -- ADDED
     GameTooltip:AddLine("|cff00ff00<Left-Click> Open Guild Roster|r")
     GameTooltip:AddLine("|cff00ff00<Right-Click> Open Guild Menu|r")
 
@@ -234,7 +250,12 @@ function Plugin:CreateFrame(parent)
 
     end)
 
+    -- ADDED: live refresh when holding/releasing shift
     f:SetScript("OnUpdate",function(self,elapsed)
+
+        if GameTooltip:IsOwned(self) then
+            ShowTooltip(self)
+        end
 
         self.timer = (self.timer or 0) + elapsed
 
