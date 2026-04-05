@@ -725,6 +725,15 @@ function M:IsItemValidForSpec(link)
             end
         end
     end
+	
+	--====================================================
+	-- 🛡 SHIELD BLOCK (CLASS RESTRICTION)
+	--====================================================
+	if itemEquipLoc == "INVTYPE_SHIELD" then
+		if class ~= "WARRIOR" and class ~= "PALADIN" and class ~= "SHAMAN" then
+			return false, "CLASS"
+		end
+	end	
 
     return true
 end
