@@ -70,6 +70,7 @@ Modules\QoL\SubModules\Automation.lua
 Modules\QoL\SubModules\AutoGreed.lua
 Modules\QoL\SubModules\AltBuy.lua
 Modules\QoL\SubModules\DoubleTradeSkill.lua
+Modules\QoL\SubModules\FlashingNodes.lua
 Modules\QoL\SubModules\MapCoords.lua
 Modules\QoL\SubModules\Minimap.lua
 Modules\QoL\SubModules\Notifications.lua

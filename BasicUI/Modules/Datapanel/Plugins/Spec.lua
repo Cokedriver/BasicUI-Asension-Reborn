@@ -9,6 +9,258 @@ local Plugin = {}
 Plugin.name = "spec"
 
 --============================================================
+-- COMPLETE ROLE DEFINITIONS
+--============================================================
+local ROLE_DATA = {
+
+    DRUID = {
+        Feral = {
+            Guardian = {
+                talents = { "thick hide", "survival instincts" },
+                role = "Tank"
+            },
+            ["Feral DPS"] = {
+                talents = { "ferocious bite", "mangle", "rip" },
+                role = "DPS"
+            }
+        },
+        Balance = {
+            Balance = {
+                talents = { "moonkin form", "wrath", "starfire" },
+                role = "DPS"
+            }
+        },
+        Restoration = {
+            Restoration = {
+                talents = { "lifebloom", "wild growth", "swiftmend" },
+                role = "Healer"
+            }
+        }
+    },
+
+    PALADIN = {
+        Protection = {
+            Protection = {
+                talents = { "holy shield", "ardent defender" },
+                role = "Tank"
+            }
+        },
+        Retribution = {
+            Retribution = {
+                talents = { "crusader strike", "divine storm" },
+                role = "DPS"
+            }
+        },
+        Holy = {
+            Holy = {
+                talents = { "holy shock", "beacon of light" },
+                role = "Healer"
+            }
+        }
+    },
+
+    WARRIOR = {
+        Protection = {
+            Protection = {
+                talents = { "shield slam", "devastate" },
+                role = "Tank"
+            }
+        },
+        Arms = {
+            Arms = {
+                talents = { "mortal strike", "bladestorm" },
+                role = "DPS"
+            }
+        },
+        Fury = {
+            Fury = {
+                talents = { "bloodthirst", "flurry" },
+                role = "DPS"
+            }
+        }
+    },
+
+    SHAMAN = {
+        Enhancement = {
+            ["Enhancement Tank"] = {
+                buffs = { "earthen guardian" },
+                role = "Tank"
+            },
+            ["Enhancement DPS"] = {
+                talents = { "stormstrike", "lava lash" },
+                role = "DPS"
+            }
+        },
+        Elemental = {
+            Elemental = {
+                talents = { "lightning bolt", "lava burst" },
+                role = "DPS"
+            }
+        },
+        Restoration = {
+            Restoration = {
+                talents = { "chain heal", "riptide" },
+                role = "Healer"
+            }
+        }
+    },
+
+    PRIEST = {
+        Holy = {
+            Holy = {
+                talents = { "circle of healing", "guardian spirit" },
+                role = "Healer"
+            }
+        },
+        Discipline = {
+            Discipline = {
+                talents = { "power word: shield", "penance" },
+                role = "Healer"
+            }
+        },
+        Shadow = {
+            Shadow = {
+                talents = { "shadowform", "vampiric touch" },
+                role = "DPS"
+            }
+        }
+    },
+
+    DEATHKNIGHT = {
+        Blood = {
+            Blood = {
+                talents = { "vampiric blood", "heart strike" },
+                role = "Tank"
+            }
+        },
+        Frost = {
+            Frost = {
+                talents = { "frost strike", "howling blast" },
+                role = "DPS"
+            }
+        },
+        Unholy = {
+            Unholy = {
+                talents = { "scourge strike", "summon gargoyle" },
+                role = "DPS"
+            }
+        }
+    },
+
+    ROGUE = {
+        Assassination = {
+            Assassination = {
+                talents = { "mutilate", "envenom" },
+                role = "DPS"
+            }
+        },
+        Combat = {
+            Combat = {
+                talents = { "sinister strike", "killing spree" },
+                role = "DPS"
+            }
+        },
+        Subtlety = {
+            Subtlety = {
+                talents = { "shadowstep", "hemorrhage" },
+                role = "DPS"
+            }
+        }
+    },
+
+    MAGE = {
+        Arcane = {
+            Arcane = {
+                talents = { "arcane blast", "arcane power" },
+                role = "DPS"
+            }
+        },
+        Fire = {
+            Fire = {
+                talents = { "pyroblast", "combustion" },
+                role = "DPS"
+            }
+        },
+        Frost = {
+            Frost = {
+                talents = { "ice lance", "deep freeze" },
+                role = "DPS"
+            }
+        }
+    },
+
+    HUNTER = {
+        BeastMastery = {
+            ["Beast Mastery"] = {
+                talents = { "bestial wrath", "kill command" },
+                role = "DPS"
+            }
+        },
+        Marksmanship = {
+            Marksmanship = {
+                talents = { "aimed shot", "chimera shot" },
+                role = "DPS"
+            }
+        },
+        Survival = {
+            Survival = {
+                talents = { "explosive shot", "black arrow" },
+                role = "DPS"
+            }
+        }
+    }
+}
+
+--============================================================
+-- HELPERS
+--============================================================
+
+local function GetTalentNames(entries)
+    local names = {}
+
+    for _, entry in ipairs(entries) do
+        if entry.Name then
+            table.insert(names, entry.Name:lower())
+        end
+    end
+
+    return names
+end
+
+local function HasAny(list, values)
+    if not values then return false end
+
+    for _, v in ipairs(values) do
+        for _, name in ipairs(list) do
+            if name:find(v) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function HasBuff(buffList)
+    if not buffList then return false end
+
+    for i = 1, 40 do
+        local name = UnitBuff("player", i)
+        if not name then break end
+
+        name = name:lower()
+
+        for _, buff in ipairs(buffList) do
+            if name:find(buff) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+--============================================================
 -- Determine Spec based on Talent Distribution
 --============================================================
 local function GetPlayerSpec()
@@ -17,6 +269,7 @@ local function GetPlayerSpec()
         return UnitClass("player") or "Unknown"
     end
 
+    local class = select(2, UnitClass("player"))
     local entries = C_CharacterAdvancement.GetKnownTalentEntries()
 
     if not entries or #entries == 0 then
@@ -24,6 +277,7 @@ local function GetPlayerSpec()
     end
 
     local tabCounts = {}
+    local talentNames = GetTalentNames(entries)
 
     for _, entry in ipairs(entries) do
         if entry.Tab then
@@ -31,8 +285,8 @@ local function GetPlayerSpec()
         end
     end
 
-    local maxCount = 0
-    local primaryTab = nil
+    -- Determine primary tab
+    local maxCount, primaryTab = 0, nil
 
     for tab, count in pairs(tabCounts) do
         if count > maxCount then
@@ -41,12 +295,37 @@ local function GetPlayerSpec()
         end
     end
 
-    if primaryTab then
-        return primaryTab:gsub("(%u)", " %1"):gsub("^%s+", ""), tabCounts
+    if not primaryTab then
+        return UnitClass("player") or "Unknown", tabCounts
     end
 
-    return UnitClass("player") or "Unknown", tabCounts
+    local formattedTab = primaryTab:gsub("(%u)", " %1"):gsub("^%s+", "")
 
+    --========================================================
+    -- 🔥 ADVANCED ROLE DETECTION
+    --========================================================
+    local classData = ROLE_DATA[class]
+
+    if classData and classData[formattedTab] then
+        local specGroup = classData[formattedTab]
+
+	-- PASS 1: Buffs (highest priority)
+	for specName, data in pairs(specGroup) do
+		if data.buffs and HasBuff(data.buffs) then
+			return specName, tabCounts
+		end
+	end
+
+	-- PASS 2: Talents
+	for specName, data in pairs(specGroup) do
+		if data.talents and HasAny(talentNames, data.talents) then
+			return specName, tabCounts
+		end
+	end
+    end
+
+    -- fallback
+    return formattedTab, tabCounts
 end
 
 --============================================================

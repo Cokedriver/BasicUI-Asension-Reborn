@@ -143,14 +143,110 @@ function M:GetAdaptiveWeights()
     end
 end
 
+function M:GetAdvancedSpec()
+
+    local baseSpec = GetPlayerSpec()
+    local _, class = UnitClass("player")
+
+    --====================================================
+    -- 🐻 DRUID: FERAL SPLIT
+    --====================================================
+    if class == "DRUID" and baseSpec == "Feral" then
+
+        if C_CharacterAdvancement and C_CharacterAdvancement.GetKnownTalentEntries then
+
+            local entries = C_CharacterAdvancement.GetKnownTalentEntries()
+
+            if entries then
+                for _, entry in ipairs(entries) do
+
+                    -- Talent name check
+                    if entry.Name then
+                        local name = entry.Name:lower()
+
+                        if name:find("thick hide") then
+                            return "Feral Guardian"
+                        end
+                    end
+
+                    -- SpellID fallback
+                    if entry.SpellID then
+                        local spellName = GetSpellInfo(entry.SpellID)
+                        if spellName and spellName:lower():find("thick hide") then
+                            return "Feral Guardian"
+                        end
+                    end
+                end
+            end
+        end
+
+        return "Feral DPS"
+    end
+
+	--====================================================
+	-- ⚡ SHAMAN: ENHANCEMENT SPLIT (ASCENSION)
+	--====================================================
+	if class == "SHAMAN" and baseSpec == "Enhancement" then
+
+		-- 🛡️ PRIMARY: Earthen Guardian aura (BEST SIGNAL)
+		for i = 1, 40 do
+			local buff = UnitBuff("player", i)
+			if not buff then break end
+
+			buff = buff:lower()
+
+			if buff:find("earthen guardian") then
+				return "Enhancement Tank"
+			end
+		end
+
+		-- 🧠 SECONDARY: Talent fallback (optional safety)
+		if C_CharacterAdvancement and C_CharacterAdvancement.GetKnownTalentEntries then
+
+			local entries = C_CharacterAdvancement.GetKnownTalentEntries()
+
+			if entries then
+				for _, entry in ipairs(entries) do
+
+					if entry.Name then
+						local name = entry.Name:lower()
+
+						if name:find("toughness") or name:find("shield specialization") then
+							return "Enhancement Tank"
+						end
+					end
+
+					if entry.SpellID then
+						local spellName = GetSpellInfo(entry.SpellID)
+						if spellName then
+							spellName = spellName:lower()
+
+							if spellName:find("toughness") then
+								return "Enhancement Tank"
+							end
+						end
+					end
+				end
+			end
+		end
+
+		-- ⚔️ DEFAULT
+		return "Enhancement DPS"
+	end
+
+    --====================================================
+    -- ✅ DEFAULT (ALL OTHER SPECS)
+    --====================================================
+    return baseSpec
+end
+
 --============================================================
 -- 🎯 SPEC-BASED WEIGHTS
 --============================================================
 function M:GetSpecWeights()
 
-    local spec = GetPlayerSpec()
-	
-    -- 🔧 normalize spec string
+    local spec = self:GetAdvancedSpec()
+
     if spec then
         spec = spec:gsub("%s+", " ")
     end
@@ -158,91 +254,382 @@ function M:GetSpecWeights()
     local weights = {
 
         --====================================================
-        -- 🛡 WARRIOR
+        -- 🌿 DRUID
         --====================================================
-        ["Arms"]        = { STR=3.2, CRIT=2.2, HASTE=1.6 },
-        ["Fury"]        = { STR=3.0, HASTE=2.2, CRIT=2.0 },
-        ["Protection Warrior"] = { STR=2.0, STAM=2.5, HASTE=1.5 },
+
+        ["Feral DPS"] = {
+            AGI = 2,
+            AP  = 1,
+            HIT = .5,
+            EXP = .5,
+            CRIT = .6,
+            HASTE = .4,
+            ARPEN = 1,
+            STR = 2,
+            STAM = 0
+        },
+
+        ["Feral Guardian"] = {
+            STAM = 3,
+            AP = 1,
+			STR = 1,
+			ARMOR = .1,
+			ARPEN = .5,
+			EXP = .5,
+            AGI = 2,
+            DODGE = .9,
+            DEF = 2,
+        },
+
+        ["Balance"] = {
+            INT = .6,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .7,
+            CRIT = .6,
+            SPELLPEN = .5,
+            SPIRIT = 0.3
+        },
+
+        ["Restoration"] = {
+            INT = .1,
+            SP  = 1,
+			SPIRIT = .9,
+            HASTE = .8,
+            CRIT = .5,
+            MP5 = 0,
+            STAM = 0
+        },
+
+        --====================================================
+        -- ⚔️ WARRIOR
+        --====================================================
+
+        ["Arms"] = {
+            STR = 2,
+			AGI = 1,
+            AP  = 1,
+            WEAPON_DPS = 14,
+            HIT = .5,
+            EXP = .5,
+            CRIT = .5,
+            HASTE = .5,
+            ARPEN = 1
+        },
+
+        ["Fury"] = {
+            STR = 2,
+			AGI = 1,
+            AP  = 1,
+            WEAPON_DPS = 14,
+            HIT = .5,
+            EXP = .5,
+            CRIT = .5,
+            HASTE = .6,
+            ARPEN = .5
+        },
+
+        ["Protection Warrior"] = {
+            STAM = 2,
+            ARMOR = .1,
+            DEF = 1,
+            DODGE = 1,
+            PARRY = 1,
+            BLOCK = 1,
+            STR = 1,
+			AGI = 1,
+			ARPEN = .5,
+			AP = 1,
+			WEAPON_DPS = 14,
+			CRIT = .2,
+			HASTE = .2,
+			HIT = .5
+        },
 
         --====================================================
         -- 🛡 PALADIN
         --====================================================
-        ["Retribution"] = { STR=3.2, CRIT=2.2, HASTE=1.8 },
-        ["Holy"]        = { INT=3.5, HASTE=2.2, CRIT=1.6 },
-        ["Protection"]  = { STR=2.0, STAM=2.5, HASTE=1.5 },
 
-        --====================================================
-        -- 🌿 DRUID
-        --====================================================
-        ["Feral"]       = { AGI=3.2, CRIT=2.3, HASTE=1.8 },
-        ["Balance"]     = { INT=3.5, HASTE=2.2, CRIT=1.6 },
-        ["Restoration"] = { INT=3.5, HASTE=2.0 },
+        ["Retribution"] = {
+            STR = 2.5,
+            AP  = 1,
+            WEAPON_DPS = 14,
+            HIT = 1,
+            EXP = .5,
+            CRIT = 1,
+            HASTE = .4,
+			STR = 2.5,
+			AGI = 1,
+			AP = 1,
+			SO = .7,
+			ARPEN = .1,
+			EXP = .5
+        },
+
+        ["Holy"] = {
+            INT = 4,
+            SP  = 1,
+            CRIT = .4,
+            HASTE = 1,
+            MP5 = .2,
+			SPIRIT = .5
+        },
+
+        ["Protection"] = {
+            STAM = 2.5,
+            ARMOR = .1,
+            DEF = 2,
+            DODGE = .5,
+            PARRY = .5,
+            BLOCK = 2,
+            STR = 1,
+			AGI = 1,
+			AP = 1,
+			WEAPON_DPS = 14,
+			CRIT = .1,
+			HASTE = .1,
+			HIT = .5
+        },
 
         --====================================================
         -- ⚡ SHAMAN
         --====================================================
-        ["Enhancement"] = { AGI=3.0, STR=2.0, HASTE=2.0 },
-        ["Elemental"]   = { INT=3.5, HASTE=2.2 },
-        ["Restoration Shaman"] = { INT=3.5, HASTE=2.0 },
+
+        ["Enhancement"] = {
+            AGI = 1,
+            AP  = 1,
+            WEAPON_DPS = 14,
+            HIT = .5,
+            EXP = .5,
+            STR = 1,
+            CRIT = .5,
+            HASTE = .5,
+			SP = .4
+        },
+
+        ["Elemental"] = {
+            INT = .2,
+            SP  = 1,
+            HIT = .5,
+            HASTE = 1,
+            CRIT = .9,
+            SPELLPEN = .5
+        },
+
+        ["Restoration Shaman"] = {
+            INT = 1,
+            SP  = 1,
+            HASTE = .5,
+            CRIT = .5,
+            MP5 = .1,
+			SPIRIT = .1
+        },
 
         --====================================================
         -- 🗡 ROGUE
         --====================================================
-        ["Assassination"] = { AGI=3.2, CRIT=2.3 },
-        ["Outlaw"]        = { AGI=3.0, HASTE=2.0 },
-        ["Subtlety"]      = { AGI=3.2, CRIT=2.2 },
+
+        ["Assassination"] = {
+            AGI = 2,
+            AP  = 1,
+            HIT = .5,
+            EXP = .5,
+            CRIT = .8,
+            HASTE = .6,
+			STR = 1,
+			WEAPON_DPS = 14,
+			ARPEN = .5
+        },
+
+        ["Outlaw"] = {
+            AGI = 4.0,
+            AP  = 3.5,
+            WEAPON_DPS = 4.5,
+            HIT = 3.2,
+            EXP = 3.0,
+            CRIT = 2.6,
+            HASTE = 2.4
+        },
+
+        ["Subtlety"] = {
+            AGI = 2,
+            AP  = 1,
+            HIT = .5,
+            EXP = .5,
+            CRIT = .7,
+            HASTE = .6
+        },
 
         --====================================================
         -- 🏹 HUNTER
         --====================================================
-        ["Beast Mastery"] = { AGI=3.2, CRIT=2.2, HASTE=1.8 },
-        ["Marksmanship"]  = { AGI=3.4, CRIT=2.4 },
-        ["Survival"]      = { AGI=3.0, HASTE=2.0 },
+
+        ["Beast Mastery"] = {
+            AGI = 2,
+            AP  = 1,
+            HIT = .5,
+            CRIT = .5,
+            HASTE = .4,
+			STAM = .1,
+			INT = .1,
+			ARPEN = .5,
+			WEAPON_DPS = 14
+        },
+
+        ["Marksmanship"] = {
+            AGI = 2,
+            AP  = 1,
+            HIT = .5,
+            CRIT = .8,
+            HASTE = .5,
+			STAM = .1,
+			INT = 1.1,
+			ARPEN = 1,
+			WEAPON_DPS = 14
+        },
+
+        ["Survival"] = {
+            AGI = 2.5,
+            AP  = 1,
+            HIT = .5,
+            CRIT = .4,
+            HASTE = .8,
+			STAM = .1,
+			INT = .1,
+			STR = 1,
+			WEAPON_DPS = 14,
+			ARPEN = 1
+        },
 
         --====================================================
         -- 🔥 MAGE
         --====================================================
-        ["Fire"]   = { INT=3.5, CRIT=2.4 },
-        ["Frost"]  = { INT=3.5, HASTE=2.2 },
-        ["Arcane"] = { INT=3.5, HASTE=2.2 },
+
+        ["Fire"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .6,
+            CRIT = .9,
+            SPELLPEN = .5,
+			MP5 = .01
+        },
+
+        ["Frost"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .8,
+            CRIT = .5,
+			MP5 = .01,
+			SPELLPEN = .5
+        },
+
+        ["Arcane"] = {
+            INT = .8,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .6,
+            CRIT = .6,
+			SPELLPEN = .5,
+			MP5 = .05
+        },
 
         --====================================================
         -- ☠️ WARLOCK
         --====================================================
-        ["Affliction"] = { INT=3.5, HASTE=2.2 },
-        ["Demonology"] = { INT=3.5, HASTE=2.0 },
-        ["Destruction"] = { INT=3.5, CRIT=2.2 },
+
+        ["Affliction"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            HASTE = 2,
+            CRIT = .8
+        },
+
+        ["Demonology"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .5,
+            CRIT = .5,
+			SPELLPEN = .5,
+			SPIRIT = .5
+        },
+
+        ["Destruction"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            CRIT = .7,
+            HASTE = .8,
+			SPELLPEN = .5
+        },
 
         --====================================================
         -- ✝️ PRIEST
         --====================================================
-        ["Shadow"]     = { INT=3.5, HASTE=2.2 },
-        ["Discipline"] = { INT=3.5, HASTE=2.0 },
-        ["Holy Priest"] = { INT=3.5, HASTE=2.0 },
+
+        ["Shadow"] = {
+            INT = .1,
+            SP  = 1,
+            HIT = .5,
+            HASTE = .7,
+            CRIT = .6,
+			SPELLPEN = .5
+        },
+
+        ["Discipline"] = {
+            INT = .4,
+            SP  = 1,
+            HASTE = .6,
+            CRIT = .2,
+            MP5 = .3,
+			SPIRIT = .1
+        },
+
+        ["Holy Priest"] = {
+            INT = .5,
+            SP  = 1,
+            HASTE = .5,
+            CRIT = .6,
+            MP5 = .3
+        },
 
         --====================================================
         -- 💀 DEATH KNIGHT
         --====================================================
-        ["Blood"]  = { STR=2.5, STAM=2.5 },
-        ["Frost DK"]  = { STR=3.2, HASTE=2.2 },
-        ["Unholy"] = { STR=3.0, HASTE=2.0 },
+
+        ["Blood"] = {
+            STAM = 4.5,
+            DEF = 3.0,
+            DODGE = 2.5,
+            PARRY = 2.2
+        },
+
+        ["Frost DK"] = {
+            STR = 4.0,
+            AP  = 3.5,
+            WEAPON_DPS = 4.5,
+            HIT = 3.2,
+            EXP = 3.0,
+            CRIT = 2.6,
+            HASTE = 2.3
+        },
+
+        ["Unholy"] = {
+            STR = 4.0,
+            AP  = 3.5,
+            HIT = 3.2,
+            EXP = 3.0,
+            CRIT = 2.6,
+            HASTE = 2.3
+        },
 
         --====================================================
-        -- 🐼 MONK
+        -- 🧠 FALLBACK
         --====================================================
-        ["Windwalker"] = { AGI=3.2, CRIT=2.2 },
-        ["Brewmaster"] = { AGI=2.5, STAM=2.5 },
-        ["Mistweaver"] = { INT=3.5, HASTE=2.0 },
 
-        --====================================================
-        -- 😈 DEMON HUNTER
-        --====================================================
-        ["Havoc"] = { AGI=3.4, CRIT=2.3 },
-        ["Vengeance"] = { AGI=2.5, STAM=2.5 },
-
-        --====================================================
-        -- 💀 FALLBACK (VERY IMPORTANT)
-        --====================================================
         ["Unknown"] = self:GetAdaptiveWeights(),
     }
 
@@ -254,9 +641,74 @@ end
 --============================================================
 
 function M:IsItemValidForSpec(link)
-    local weights = self:GetSpecWeights()
-    local class = select(2, UnitClass("player"))
+    if not link then return false, "CLASS" end
 
+    local class = select(2, UnitClass("player"))
+    local spec = GetPlayerSpec()
+    local weights = self:GetSpecWeights()
+
+    local itemName, _, _, _, _, itemType, itemSubType, _, itemEquipLoc = GetItemInfo(link)
+
+    if not itemType then return true end
+
+    --====================================================
+    -- 🛡 ARMOR FILTER
+    --====================================================
+    if itemType == "Armor" then
+        local isArmorSlot =
+            itemEquipLoc == "INVTYPE_HEAD" or
+            itemEquipLoc == "INVTYPE_SHOULDER" or
+            itemEquipLoc == "INVTYPE_CHEST" or
+            itemEquipLoc == "INVTYPE_ROBE" or
+            itemEquipLoc == "INVTYPE_WAIST" or
+            itemEquipLoc == "INVTYPE_LEGS" or
+            itemEquipLoc == "INVTYPE_FEET" or
+            itemEquipLoc == "INVTYPE_WRIST" or
+            itemEquipLoc == "INVTYPE_HAND"
+
+        if isArmorSlot then
+            if class == "DRUID" or class == "ROGUE" or class == "MONK" then
+                if itemSubType ~= "Leather" then
+                    -- Cloth is wearable but not ideal → SPEC issue
+                    if itemSubType == "Cloth" then
+                        return false, "SPEC"
+                    end
+                    return false, "CLASS"
+                end
+            elseif class == "MAGE" or class == "PRIEST" or class == "WARLOCK" then
+                if itemSubType ~= "Cloth" then return false, "CLASS" end
+            elseif class == "HUNTER" or class == "SHAMAN" then
+                if itemSubType ~= "Mail" then return false, "CLASS" end
+            elseif class == "WARRIOR" or class == "PALADIN" or class == "DEATHKNIGHT" then
+                if itemSubType ~= "Plate" then return false, "CLASS" end
+            end
+        end
+    end
+
+    --====================================================
+    -- ⚔️ WEAPON FILTER
+    --====================================================
+    if itemType == "Weapon" then
+        local sub = itemSubType and itemSubType:lower() or ""
+
+        -- Casters using melee → SPEC issue
+        if weights.INT and weights.INT > (weights.STR or 0) and weights.INT > (weights.AGI or 0) then
+            if sub:find("axe") or sub:find("sword") or sub:find("mace") then
+                return false, "SPEC"
+            end
+        end
+
+        -- Melee using wand → SPEC issue
+        if (weights.STR or 0) > (weights.INT or 0) or (weights.AGI or 0) > (weights.INT or 0) then
+            if sub:find("wand") then
+                return false, "SPEC"
+            end
+        end
+    end
+
+    --====================================================
+    -- 🪄 RELICS (CLASS LOCKED)
+    --====================================================
     scanTip:ClearLines()
     scanTip:SetHyperlink(link)
 
@@ -266,14 +718,10 @@ function M:IsItemValidForSpec(link)
             local text = right:GetText()
             if text then
                 text = text:lower()
-
-                if text == "wand" then return weights.INT and weights.INT > 1 end
-                if text == "gun" or text == "bow" or text == "crossbow" then return weights.AGI and weights.AGI > 1 end
-
-                if text == "libram" then return class == "PALADIN" end
-                if text == "totem" then return class == "SHAMAN" end
-                if text == "idol" then return class == "DRUID" end
-                if text == "sigil" then return class == "DEATHKNIGHT" end
+				-- Allow relics (handled by custom system)
+				if text == "libram" or text == "totem" or text == "idol" or text == "sigil" then
+					return true
+				end
             end
         end
     end
@@ -320,6 +768,62 @@ function M:GetItemScore(link)
 end
 
 --============================================================
+-- 🪄 RELIC COMPATIBILITY SYSTEM
+--============================================================
+local function IsRelic(itemLink)
+    if not itemLink then return false end
+    local _, _, _, _, _, _, _, _, equipLoc = GetItemInfo(itemLink)
+    return equipLoc == "INVTYPE_RELIC"
+end
+
+local function GetItemStatsFromTooltip(tooltip)
+    local stats = { agi=0,str=0,int=0,stam=0,ap=0,crit=0,spell=0 }
+
+    for i = 1, tooltip:NumLines() do
+        local line = _G[tooltip:GetName().."TextLeft"..i]
+        if line then
+            local text = line:GetText()
+            if text then
+                text = text:lower()
+
+                if text:find("agility") then stats.agi = stats.agi + 1 end
+                if text:find("strength") then stats.str = stats.str + 1 end
+                if text:find("intellect") then stats.int = stats.int + 1 end
+                if text:find("stamina") then stats.stam = stats.stam + 1 end
+                if text:find("attack power") then stats.ap = stats.ap + 1 end
+                if text:find("critical") then stats.crit = stats.crit + 1 end
+                if text:find("spell power") then stats.spell = stats.spell + 1 end
+            end
+        end
+    end
+
+    return stats
+end
+
+local SPEC_WEIGHTS_RELIC = {
+    ["Feral Guardian"] = { stam=3, agi=2 },
+    ["Feral DPS"] = { agi=3, ap=3, crit=2 },
+    ["Enhancement Tank"] = { stam=3, str=2 },
+    ["Enhancement DPS"] = { str=3, ap=3, crit=2 },
+    ["Balance"] = { int=3, spell=3 },
+    ["Elemental"] = { int=3, spell=3 },
+    ["Restoration"] = { int=3, spell=3 },
+    ["Holy"] = { int=3, spell=3 },
+    ["Retribution"] = { str=3, ap=3 },
+    ["Protection"] = { stam=3, str=2 },
+}
+
+local function ScoreRelic(stats, weights)
+    local score = 0
+    for stat, val in pairs(stats) do
+        if weights[stat] then
+            score = score + val * weights[stat]
+        end
+    end
+    return score
+end
+
+--============================================================
 -- TOOLTIP
 --============================================================
 
@@ -328,6 +832,31 @@ local function AddTooltip(tooltip)
 
     local _, link = tooltip:GetItem()
     if not link then return end
+	
+	--============================================================
+	-- 🪄 RELIC SCORING DISPLAY
+	--============================================================
+	if IsRelic(link) then
+
+		local spec = M:GetAdvancedSpec()
+		local weights = SPEC_WEIGHTS_RELIC[spec]
+
+		if weights then
+			local stats = GetItemStatsFromTooltip(tooltip)
+			local score = ScoreRelic(stats, weights)
+
+			tooltip:AddLine(" ")
+			tooltip:AddLine("|cff66ccffBasicUI Item Score|r")
+			
+			if score >= 6 then
+				tooltip:AddLine("|cff00ff00Relic: Excellent match for your spec|r")
+			elseif score >= 3 then
+				tooltip:AddLine("|cffffff00Relic: Good match for your spec|r")
+			else
+				tooltip:AddLine("|cffff5555Relic: Not ideal for your spec|r")
+			end
+		end
+	end
 
     if IsProfessionTool(link) then return end
 
@@ -342,12 +871,65 @@ local function AddTooltip(tooltip)
     end
 
     -- 🚫 spec filter
-    if M.db.specFilter and not M:IsItemValidForSpec(link) then
-        tooltip:AddLine(" ")
-        tooltip:AddLine("|cffff5555This item is not for your class/spec|r")
-		tooltip:AddLine(" ")
-        return
-    end
+	if M.db.specFilter then
+		local valid, reason = M:IsItemValidForSpec(link)
+
+		if not valid then
+			tooltip:AddLine(" ")
+
+			--========================
+			-- 🎨 CLASS COLOR
+			--========================
+			local className, classFile = UnitClass("player")
+			local classColor = RAID_CLASS_COLORS[classFile]
+
+			local coloredClass = className
+			if classColor then
+				coloredClass = string.format(
+					"|cff%02x%02x%02x%s|r",
+					classColor.r * 255,
+					classColor.g * 255,
+					classColor.b * 255,
+					className
+				)
+			end
+
+			--========================
+			-- 🎨 SPEC COLOR
+			--========================
+			local spec = GetPlayerSpec()
+			local weights = M:GetSpecWeights()
+
+			local specColor = "|cffffff00" -- default yellow
+
+			local str = weights.STR or 0
+			local agi = weights.AGI or 0
+			local int = weights.INT or 0
+
+			if str >= agi and str >= int then
+				specColor = "|cffff5555" -- red (STR)
+			elseif agi >= str and agi >= int then
+				specColor = "|cff55ff55" -- green (AGI)
+			elseif int >= str and int >= agi then
+				specColor = "|cff5599ff" -- blue (INT)
+			end
+
+			local coloredSpec = specColor .. spec .. "|r"
+
+			--========================
+			-- 🧾 OUTPUT
+			--========================
+			if reason == "CLASS" then
+				tooltip:AddLine("|cffff5555This item is not for your|r " ..coloredClass.. " |cffff5555class|r")
+
+			elseif reason == "SPEC" then
+				tooltip:AddLine("|cffffff00This item is not ideal for your|r " ..coloredSpec.. " |cffffff00spec|r")
+			end
+
+			tooltip:AddLine(" ")
+			return
+		end
+	end
 
     local upgrades = BasicUI.ItemScore.Upgrades
     if not upgrades then return end

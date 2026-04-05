@@ -51,6 +51,9 @@ M.defaults = {
     enableAlertMove         = true,
     enableLootMove          = true,
     enableLargeLootIcons    = true,
+	
+	enableFlashingNodes    = true,
+	flashInterval          = 1.0,
 }
 
 --============================================================
@@ -212,7 +215,7 @@ M.options = {
                         BasicUI:RefreshModule(M)
                     end,
                 },
-
+				
                 enableTradeSkill = {
                     type = "toggle",
                     name = "Enable Trade Skill Enhancements",
@@ -224,8 +227,35 @@ M.options = {
                         M.db.enableTradeSkill = v
                         BasicUI:RefreshModule(M)
                     end,
-                },
+                },				
+				
+				enableFlashingNodes = {
+					type = "toggle",
+					name = "Flashing Minimap Nodes",
+					desc = "Makes gathering nodes flash on the minimap.",
+					order = 3,
 
+					get = function() return M.db.enableFlashingNodes end,
+					set = function(_, v)
+						M.db.enableFlashingNodes = v
+						BasicUI:RefreshModule(M)
+					end,
+				},
+
+				flashInterval = {
+					type = "range",
+					name = "Node Flash Speed",
+					desc = "Adjust how fast minimap nodes flash.",
+					order = 4,
+					min = 0.1,
+					max = 1,
+					step = 0.05,
+
+					get = function() return M.db.flashInterval end,
+					set = function(_, v)
+						M.db.flashInterval = v
+					end,
+				},	
             },
         },
 
