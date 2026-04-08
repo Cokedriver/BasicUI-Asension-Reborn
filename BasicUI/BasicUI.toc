@@ -46,10 +46,11 @@ Modules\Datapanel\Plugins\BagSpace.lua
 Modules\Datapanel\Plugins\Durability.lua
 Modules\Datapanel\Plugins\Friends.lua
 Modules\Datapanel\Plugins\Guild.lua
-Modules\Datapanel\Plugins\Spec.lua
+Modules\Datapanel\Plugins\MainStats.lua
 Modules\Datapanel\Plugins\Professions.lua
 Modules\Datapanel\Plugins\Performance.lua
-Modules\Datapanel\Plugins\MainStats.lua
+Modules\Datapanel\Plugins\Reputation.lua
+Modules\Datapanel\Plugins\Spec.lua
 
 #============================================================
 # ItemScore

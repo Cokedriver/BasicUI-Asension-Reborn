@@ -23,6 +23,7 @@ local POSITION_LIST = {
     [6] = "Position 6",
     [7] = "Position 7",
     [8] = "Position 8",
+    [9] = "Position 9", -- NEW
 }
 
 --============================================================
@@ -38,13 +39,14 @@ M.defaults = {
 
     plugins = {
         performance = { position = 1 },
-        friends = { position = 2 },
-        guild = { position = 3 },
-        mainstats = { position = 4 },
-        spec = { position = 5 },
-        professions = { position = 6 },
-        durability = { position = 7 },
-        bagspace = { position = 8 },
+		reputation = { position = 2 },
+        friends = { position = 3 },
+        guild = { position = 4 },
+        mainstats = { position = 5 },
+        spec = { position = 6 },
+        professions = { position = 7 },
+        durability = { position = 8 },
+        bagspace = { position = 9 },
     }
 
 }
@@ -142,6 +144,8 @@ function M:OnEnable()
 
     self.panel:Show()
 
+    -- Initial setup
+    self:UpdatePanelWidth()
     self:DockMainMenuBar()
 
     ------------------------------------------------
@@ -172,32 +176,107 @@ function M:OnEnable()
         end
     end
 
-	self:UpdatePanel()
-	self:StartRefreshEngine()
-	--self:ApplyTooltipFont()
-	--self:ApplyEasyMenuFont()
+    self:UpdatePanel()
+    self:StartRefreshEngine()
 
-	GameTooltip:HookScript("OnEnter", function(self)
-		if self == GameTooltip then
-			GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
-		end
-	end)
+    ------------------------------------------------
+    -- Tooltip fix
+    ------------------------------------------------
 
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", function()
-		if M.db and M.db.enabled then
-			C_Timer.After(0.1, function()
-				self:DockMainMenuBar()
-			end)
-		end
-	end)
+    GameTooltip:HookScript("OnEnter", function(self)
+        if self == GameTooltip then
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        end
+    end)
 
-	hooksecurefunc("UIParent_ManageFramePositions", function()
-		if M.db and M.db.enabled then
-			M:DockMainMenuBar()
-		end
-	end)
+    ------------------------------------------------
+    -- 🔁 REDOCK HANDLER (zoning / instances)
+    ------------------------------------------------
 
-	
+    local function Redock()
+        if M.db and M.db.enabled then
+            C_Timer.After(0.05, function()
+                M:DockMainMenuBar()
+                M:UpdatePanelWidth()
+            end)
+        end
+    end
+
+    self:RegisterEvent("PLAYER_ENTERING_WORLD", Redock)
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", Redock)
+
+    ------------------------------------------------
+    -- 🛡 Combat-safe width update
+    ------------------------------------------------
+
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+        if M.pendingWidthUpdate then
+            M.pendingWidthUpdate = nil
+            M:UpdatePanelWidth()
+            M:DockMainMenuBar()
+        end
+    end)
+
+    ------------------------------------------------
+    -- Blizzard frame manager override
+    ------------------------------------------------
+
+    hooksecurefunc("UIParent_ManageFramePositions", function()
+        if M.db and M.db.enabled then
+            M:DockMainMenuBar()
+            M:UpdatePanelWidth()
+        end
+    end)
+
+    ------------------------------------------------
+    -- 🔒 HARD LOCK (prevents MoveAnything, etc)
+    ------------------------------------------------
+
+	if not MainMenuBar.__BasicUILocked then
+		MainMenuBar.__BasicUILocked = true
+
+		local isMoving = false
+
+		hooksecurefunc(MainMenuBar, "SetPoint", function(frame)
+			if isMoving then return end
+			if not M.db.enabled then return end
+			if InCombatLockdown() then return end
+			if not M.panel then return end
+
+			isMoving = true
+
+			frame:ClearAllPoints()
+			frame:SetPoint("BOTTOM", M.panel, "TOP", 0, -2)
+
+			isMoving = false
+		end)
+	end
+
+    ------------------------------------------------
+    -- 🦅 Gryphon show/hide detection
+    ------------------------------------------------
+
+    hooksecurefunc(MainMenuBarLeftEndCap, "SetShown", function()
+        if not M.db or not M.db.enabled then return end
+
+        if InCombatLockdown() then
+            M.pendingWidthUpdate = true
+        else
+            M:UpdatePanelWidth()
+            M:UpdatePanel()
+        end
+    end)
+
+    hooksecurefunc(MainMenuBarRightEndCap, "SetShown", function()
+        if not M.db or not M.db.enabled then return end
+
+        if InCombatLockdown() then
+            M.pendingWidthUpdate = true
+        else
+            M:UpdatePanelWidth()
+            M:UpdatePanel()
+        end
+    end)
 
 end
 
@@ -286,6 +365,22 @@ function M:RegisterEvent(event, func)
 
 end
 
+function M:GetActiveBar()
+
+    -- Bartender4
+    if _G.BT4Bar1 and _G.BT4Bar1:IsShown() then
+        return _G.BT4Bar1
+    end
+
+    -- Dominos
+    if _G.DominosActionBar1 and _G.DominosActionBar1:IsShown() then
+        return _G.DominosActionBar1
+    end
+
+    -- Blizzard fallback
+    return MainMenuBar
+end
+
 --============================================================
 -- Panel Creation
 --============================================================
@@ -318,18 +413,39 @@ function M:CreatePanel()
     self.panel = f
 end
 
+function M:UpdatePanelWidth()
+
+    if not self.panel or not MainMenuBar then return end
+
+    -- ❌ Don't touch protected frames in combat
+    if InCombatLockdown() then
+        self.pendingWidthUpdate = true
+        return
+    end
+
+    local baseWidth = MainMenuBar:GetWidth()
+
+    local left = (MainMenuBarLeftEndCap and MainMenuBarLeftEndCap:IsShown())
+        and MainMenuBarLeftEndCap:GetWidth() or 0
+
+    local right = (MainMenuBarRightEndCap and MainMenuBarRightEndCap:IsShown())
+        and MainMenuBarRightEndCap:GetWidth() or 0
+
+    local total = baseWidth + left + right - 70
+
+    self.panel:SetWidth(total)
+end
+
 function M:DockMainMenuBar()
 
     if not MainMenuBar or not self.panel then return end
     if InCombatLockdown() then return end
+    if not self.db.enabled then return end
 
-    -- 🔑 THIS IS THE FIX
     MainMenuBar.ignoreFramePositionManager = true
 
-    -- Optional (covers more cases depending on client)
-    if OverrideActionBar then
-        OverrideActionBar.ignoreFramePositionManager = true
-    end
+    -- 🔥 Update width BEFORE anchoring
+    self:UpdatePanelWidth()
 
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", self.panel, "TOP", 0, -2)
@@ -497,7 +613,7 @@ function M:UpdatePanel()
     if not self.panel then return end
 
     local panelWidth = self.panel:GetWidth()
-    local slotCount = 8
+    local slotCount = 9
     local spacing = 0
 
     local usableWidth = panelWidth - (spacing * (slotCount - 1))
@@ -536,7 +652,7 @@ end
 
 local pluginPositions = function()
 	local t = { [0] = "Disabled" }
-	for i = 1, 8 do
+	for i = 1, 9 do
 		t[i] = "Position " .. i
 	end
 	return t
