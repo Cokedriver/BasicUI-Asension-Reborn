@@ -69,8 +69,15 @@ local function ShowTooltip(self)
 
     if not IsInGuild() then return end
 
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:ClearLines()
+	local Datapanel = BasicUI:GetModule("Datapanel")
+
+	if Datapanel and Datapanel.AnchorTooltip then
+		Datapanel:AnchorTooltip(GameTooltip, self)
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+	end
+
+	GameTooltip:ClearLines()
 
     local total = GetNumGuildMembers()
     local online = 0

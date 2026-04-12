@@ -24,6 +24,7 @@ local SLOT_MAP = {
 
     INVTYPE_WEAPONOFFHAND = 17,
     INVTYPE_SHIELD = 17,
+	INVTYPE_HOLDABLE = 17,
 }
 
 U.SLOT_MAP = SLOT_MAP
@@ -39,7 +40,17 @@ end
 
 function U:GetUpgradePercent(link)
     local newScore = self:GetEffectiveScore(link)
-    local equipLoc = select(9, GetItemInfo(link))
+    local itemName, _, _, _, _, _, _, _, equipLoc = GetItemInfo(link)
+
+    -- 🛠 FIX: force item info to load
+    if not equipLoc then
+        local itemID = GetItemInfoInstant(link)
+        if itemID then
+            equipLoc = select(4, GetItemInfoInstant(link))
+        end
+    end
+
+    if not equipLoc then return end
     local slot = self.SLOT_MAP[equipLoc]
     if not slot then return end
 
@@ -60,7 +71,7 @@ function U:GetUpgradePercent(link)
     end
 
     --========================================================
-    -- 🧠 1H WEAPON LOGIC (COMPARE VS BOTH 2H OR MH SLOT)
+    -- 🧠 1H WEAPON LOGIC (COMPARE VS MH)
     --========================================================
     if equipLoc == "INVTYPE_WEAPON" or equipLoc == "INVTYPE_WEAPONMAINHAND" then
         local mh = GetInventoryItemLink("player", 16)
@@ -68,6 +79,43 @@ function U:GetUpgradePercent(link)
 
         if mhScore <= 0 then return 100 end
         return ((newScore - mhScore) / (mhScore + 1)) * 100
+    end
+
+    --========================================================
+    -- 🛡 OFFHAND LOGIC (FIXED)
+    --========================================================
+    if equipLoc == "INVTYPE_WEAPONOFFHAND"
+    or equipLoc == "INVTYPE_SHIELD"
+    or equipLoc == "INVTYPE_HOLDABLE" then
+
+        local mh = GetInventoryItemLink("player", 16)
+        local oh = GetInventoryItemLink("player", 17)
+
+        local mhScore = mh and self:GetEffectiveScore(mh) or 0
+        local ohScore = oh and self:GetEffectiveScore(oh) or 0
+
+        -- 🧠 Case 1: Dual wield (MH + OH)
+        if mh and oh then
+            if ohScore <= 0 then return 100 end
+            return ((newScore - ohScore) / (ohScore + 1)) * 100
+        end
+
+        -- 🧠 Case 2: 2H equipped → OFFHAND ADDS VALUE (FIXED)
+        if mh and not oh then
+            if mhScore <= 0 then return 100 end
+
+            local percent = (newScore / (mhScore + 1)) * 100
+
+            -- prevent tiny values showing as equal
+            if percent > -1 and percent < 1 then
+                percent = 0
+            end
+
+            return percent
+        end
+
+        -- 🧠 Case 3: Nothing equipped
+        return 100
     end
 
     --========================================================

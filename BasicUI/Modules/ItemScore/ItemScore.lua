@@ -252,379 +252,312 @@ function M:GetSpecWeights()
     end
 
     local weights = {
-
-        --====================================================
-        -- 🌿 DRUID
-        --====================================================
-
-        ["Feral DPS"] = {
-            AGI = 2,
-            AP  = 1,
-            HIT = .5,
-            EXP = .5,
-            CRIT = .6,
-            HASTE = .4,
-            ARPEN = 1,
-            STR = 2,
-            STAM = 0
-        },
-
-        ["Feral Guardian"] = {
-            STAM = 3,
-            AP = 1,
-			STR = 1,
-			ARMOR = .1,
-			ARPEN = .5,
-			EXP = .5,
-            AGI = 2,
-            DODGE = .9,
-            DEF = 2,
-        },
-
-        ["Balance"] = {
-            INT = .6,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .7,
-            CRIT = .6,
-            SPELLPEN = .5,
-            SPIRIT = 0.3
-        },
-
-        ["Restoration"] = {
-            INT = .1,
-            SP  = 1,
-			SPIRIT = .9,
-            HASTE = .8,
-            CRIT = .5,
-            MP5 = 0,
-            STAM = 0
-        },
-
-        --====================================================
-        -- ⚔️ WARRIOR
-        --====================================================
-
-        ["Arms"] = {
-            STR = 2,
-			AGI = 1,
-            AP  = 1,
-            WEAPON_DPS = 14,
-            HIT = .5,
-            EXP = .5,
-            CRIT = .5,
-            HASTE = .5,
-            ARPEN = 1
-        },
-
-        ["Fury"] = {
-            STR = 2,
-			AGI = 1,
-            AP  = 1,
-            WEAPON_DPS = 14,
-            HIT = .5,
-            EXP = .5,
-            CRIT = .5,
-            HASTE = .6,
-            ARPEN = .5
-        },
-
-        ["Protection Warrior"] = {
-            STAM = 2,
-            ARMOR = .1,
-            DEF = 1,
-            DODGE = 1,
-            PARRY = 1,
-            BLOCK = 1,
-            STR = 1,
-			AGI = 1,
-			ARPEN = .5,
-			AP = 1,
+		-- Druid
+		["Feral DPS"] = {
+			AGI = 2.5,
+			AP  = 1,
 			WEAPON_DPS = 14,
-			CRIT = .2,
-			HASTE = .2,
-			HIT = .5
-        },
-
-        --====================================================
-        -- 🛡 PALADIN
-        --====================================================
-
-        ["Retribution"] = {
-            STR = 2.5,
-            AP  = 1,
-            WEAPON_DPS = 14,
-            HIT = 1,
-            EXP = .5,
-            CRIT = 1,
-            HASTE = .4,
-			STR = 2.5,
-			AGI = 1,
-			AP = 1,
-			SO = .7,
-			ARPEN = .1,
-			EXP = .5
-        },
-
-        ["Holy"] = {
-            INT = 4,
-            SP  = 1,
-            CRIT = .4,
-            HASTE = 1,
-            MP5 = .2,
-			SPIRIT = .5
-        },
-
-        ["Protection"] = {
-            STAM = 2.5,
-            ARMOR = .1,
-            DEF = 2,
-            DODGE = .5,
-            PARRY = .5,
-            BLOCK = 2,
-            STR = 1,
-			AGI = 1,
-			AP = 1,
-			WEAPON_DPS = 14,
-			CRIT = .1,
-			HASTE = .1,
-			HIT = .5
-        },
-
-        --====================================================
-        -- ⚡ SHAMAN
-        --====================================================
-
-        ["Enhancement"] = {
-            AGI = 1,
-            AP  = 1,
-            WEAPON_DPS = 14,
-            HIT = .5,
-            EXP = .5,
-            STR = 1,
-            CRIT = .5,
-            HASTE = .5,
-			SP = .4
-        },
-
-        ["Elemental"] = {
-            INT = .2,
-            SP  = 1,
-            HIT = .5,
-            HASTE = 1,
-            CRIT = .9,
-            SPELLPEN = .5
-        },
-
-        ["Restoration Shaman"] = {
-            INT = 1,
-            SP  = 1,
-            HASTE = .5,
-            CRIT = .5,
-            MP5 = .1,
-			SPIRIT = .1
-        },
-
-        --====================================================
-        -- 🗡 ROGUE
-        --====================================================
-
-        ["Assassination"] = {
-            AGI = 2,
-            AP  = 1,
-            HIT = .5,
-            EXP = .5,
-            CRIT = .8,
-            HASTE = .6,
-			STR = 1,
-			WEAPON_DPS = 14,
-			ARPEN = .5
-        },
-
-        ["Outlaw"] = {
-            AGI = 4.0,
-            AP  = 3.5,
-            WEAPON_DPS = 4.5,
-            HIT = 3.2,
-            EXP = 3.0,
-            CRIT = 2.6,
-            HASTE = 2.4
-        },
-
-        ["Subtlety"] = {
-            AGI = 2,
-            AP  = 1,
-            HIT = .5,
-            EXP = .5,
-            CRIT = .7,
-            HASTE = .6
-        },
-
-        --====================================================
-        -- 🏹 HUNTER
-        --====================================================
-
-        ["Beast Mastery"] = {
-            AGI = 2,
-            AP  = 1,
-            HIT = .5,
-            CRIT = .5,
-            HASTE = .4,
-			STAM = .1,
-			INT = .1,
-			ARPEN = .5,
-			WEAPON_DPS = 14
-        },
-
-        ["Marksmanship"] = {
-            AGI = 2,
-            AP  = 1,
-            HIT = .5,
-            CRIT = .8,
-            HASTE = .5,
-			STAM = .1,
-			INT = 1.1,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .8,
+			HASTE = .5,
 			ARPEN = 1,
-			WEAPON_DPS = 14
-        },
+			STR = 1.5,
+			STAM = 0
+		},
 
-        ["Survival"] = {
-            AGI = 2.5,
-            AP  = 1,
-            HIT = .5,
-            CRIT = .4,
-            HASTE = .8,
-			STAM = .1,
-			INT = .1,
+		["Feral Guardian"] = {
+			STAM = 3,
+			AP = 1,
 			STR = 1,
+			AGI = 2,
+			ARMOR = .2,
+			DODGE = 1,
+			DEF = 2,
+			WEAPON_DPS = 10 -- important but less than DPS spec
+		},
+
+		["Balance"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = 1,
+			CRIT = .7,
+			SPELLPEN = .5,
+			SPIRIT = .4
+		},
+
+		["Restoration"] = {
+			INT = .8,
+			SP  = 1,
+			SPIRIT = 1,
+			HASTE = .9,
+			CRIT = .5,
+			MP5 = .4
+		},
+
+		-- ⚔️ WARRIOR
+		["Arms"] = {
+			STR = 2,
+			AGI = 1,
+			AP  = 1,
 			WEAPON_DPS = 14,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .7,
+			HASTE = .6,
 			ARPEN = 1
-        },
+		},
 
-        --====================================================
-        -- 🔥 MAGE
-        --====================================================
+		["Fury"] = {
+			STR = 2,
+			AGI = 1,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .7,
+			HASTE = .7,
+			ARPEN = .7
+		},
 
-        ["Fire"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .6,
-            CRIT = .9,
-            SPELLPEN = .5,
-			MP5 = .01
-        },
+		["Protection Warrior"] = {
+			STAM = 2.5,
+			ARMOR = .2,
+			DEF = 2,
+			DODGE = 1,
+			PARRY = 1,
+			BLOCK = 1,
+			STR = 1,
+			AGI = 1,
+			WEAPON_DPS = 8
+		},
 
-        ["Frost"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .8,
-            CRIT = .5,
-			MP5 = .01,
-			SPELLPEN = .5
-        },
+		-- 🛡 PALADIN
+		["Retribution"] = {
+			STR = 2.5,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = 1,
+			EXP = .7,
+			CRIT = 1,
+			HASTE = .5,
+			AGI = 1,
+			ARPEN = .3
+		},
 
-        ["Arcane"] = {
-            INT = .8,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .6,
-            CRIT = .6,
-			SPELLPEN = .5,
-			MP5 = .05
-        },
+		["Holy"] = {
+			INT = 2,
+			SP  = 1,
+			CRIT = .5,
+			HASTE = 1,
+			MP5 = .5,
+			SPIRIT = .7
+		},
 
-        --====================================================
-        -- ☠️ WARLOCK
-        --====================================================
+		["Protection"] = {
+			STAM = 3,
+			ARMOR = .2,
+			DEF = 2,
+			DODGE = .7,
+			PARRY = .7,
+			BLOCK = 2,
+			STR = 1,
+			WEAPON_DPS = 8
+		},
 
-        ["Affliction"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            HASTE = 2,
-            CRIT = .8
-        },
+		-- ⚡ SHAMAN
+		["Enhancement"] = {
+			AGI = 2,
+			STR = 1,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .7,
+			HASTE = .6
+		},
 
-        ["Demonology"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .5,
-            CRIT = .5,
-			SPELLPEN = .5,
+		["Elemental"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = 1,
+			CRIT = .9
+		},
+
+		["Restoration Shaman"] = {
+			INT = 1,
+			SP  = 1,
+			HASTE = .6,
+			CRIT = .5,
+			MP5 = .4,
+			SPIRIT = .2
+		},
+
+		-- 🗡 ROGUE
+		["Assassination"] = {
+			AGI = 2.5,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .9,
+			HASTE = .7
+		},
+
+		["Outlaw"] = {
+			AGI = 3,
+			AP  = 2.5,
+			WEAPON_DPS = 10,
+			HIT = 2,
+			EXP = 2,
+			CRIT = 2,
+			HASTE = 2
+		},
+
+		["Subtlety"] = {
+			AGI = 2.5,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			EXP = .6,
+			CRIT = .8,
+			HASTE = .7
+		},
+
+		-- 🏹 HUNTER
+		["Beast Mastery"] = {
+			AGI = 2,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			CRIT = .6,
+			HASTE = .5
+		},
+
+		["Marksmanship"] = {
+			AGI = 2,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			CRIT = .9,
+			HASTE = .6
+		},
+
+		["Survival"] = {
+			AGI = 2.5,
+			AP  = 1,
+			WEAPON_DPS = 14,
+			HIT = .7,
+			CRIT = .6,
+			HASTE = .8
+		},
+
+		-- 🔥 MAGE
+		["Fire"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = .7,
+			CRIT = 1
+		},
+
+		["Frost"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = 1,
+			CRIT = .6
+		},
+
+		["Arcane"] = {
+			INT = 1.5,
+			SP  = 1,
+			HIT = .7,
+			HASTE = .7,
+			CRIT = .7
+		},
+
+		-- ☠️ WARLOCK
+		["Affliction"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = 1.5,
+			CRIT = .7
+		},
+
+		["Demonology"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = .6,
+			CRIT = .6,
 			SPIRIT = .5
-        },
+		},
 
-        ["Destruction"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            CRIT = .7,
-            HASTE = .8,
-			SPELLPEN = .5
-        },
+		["Destruction"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			CRIT = 1,
+			HASTE = .8
+		},
 
-        --====================================================
-        -- ✝️ PRIEST
-        --====================================================
+		-- ✝️ PRIEST
+		["Shadow"] = {
+			INT = 1,
+			SP  = 1,
+			HIT = .7,
+			HASTE = .8,
+			CRIT = .7
+		},
 
-        ["Shadow"] = {
-            INT = .1,
-            SP  = 1,
-            HIT = .5,
-            HASTE = .7,
-            CRIT = .6,
-			SPELLPEN = .5
-        },
+		["Discipline"] = {
+			INT = 1,
+			SP  = 1,
+			HASTE = .6,
+			CRIT = .3,
+			MP5 = .4,
+			SPIRIT = .2
+		},
 
-        ["Discipline"] = {
-            INT = .4,
-            SP  = 1,
-            HASTE = .6,
-            CRIT = .2,
-            MP5 = .3,
-			SPIRIT = .1
-        },
+		["Holy Priest"] = {
+			INT = 1,
+			SP  = 1,
+			HASTE = .6,
+			CRIT = .6,
+			MP5 = .4
+		},
 
-        ["Holy Priest"] = {
-            INT = .5,
-            SP  = 1,
-            HASTE = .5,
-            CRIT = .6,
-            MP5 = .3
-        },
+		-- 💀 DK
+		["Blood"] = {
+			STAM = 4,
+			DEF = 3,
+			DODGE = 2,
+			PARRY = 2
+		},
 
-        --====================================================
-        -- 💀 DEATH KNIGHT
-        --====================================================
+		["Frost DK"] = {
+			STR = 3,
+			AP  = 2.5,
+			WEAPON_DPS = 10,
+			HIT = 2,
+			EXP = 2,
+			CRIT = 2,
+			HASTE = 2
+		},
 
-        ["Blood"] = {
-            STAM = 4.5,
-            DEF = 3.0,
-            DODGE = 2.5,
-            PARRY = 2.2
-        },
-
-        ["Frost DK"] = {
-            STR = 4.0,
-            AP  = 3.5,
-            WEAPON_DPS = 4.5,
-            HIT = 3.2,
-            EXP = 3.0,
-            CRIT = 2.6,
-            HASTE = 2.3
-        },
-
-        ["Unholy"] = {
-            STR = 4.0,
-            AP  = 3.5,
-            HIT = 3.2,
-            EXP = 3.0,
-            CRIT = 2.6,
-            HASTE = 2.3
-        },
+		["Unholy"] = {
+			STR = 3,
+			AP  = 2.5,
+			WEAPON_DPS = 10,
+			HIT = 2,
+			EXP = 2,
+			CRIT = 2,
+			HASTE = 2
+		},
 
         --====================================================
         -- 🧠 FALLBACK
@@ -746,6 +679,45 @@ function M:GetItemScore(link)
     if not link then return 0 end
 
     local stats = GetItemStats(link)
+
+    -- 🛠 OFFHAND FIX: fallback if stats are missing or weak
+    local _, _, _, _, _, _, _, _, equipLoc = GetItemInfo(link)
+
+    if not stats or (equipLoc == "INVTYPE_HOLDABLE" or equipLoc == "INVTYPE_SHIELD" or equipLoc == "INVTYPE_WEAPONOFFHAND") then
+        scanTip:ClearLines()
+        scanTip:SetHyperlink(link)
+
+        stats = stats or {}
+
+        for i = 1, scanTip:NumLines() do
+            local line = _G["BasicUIItemScoreScannerTextLeft"..i]
+            if line then
+                local text = line:GetText()
+                if text then
+                    text = text:lower()
+
+                    local value = tonumber(text:match("(%d+)")) or 0
+
+                    if text:find("strength") then
+                        stats["ITEM_MOD_STRENGTH_SHORT"] = (stats["ITEM_MOD_STRENGTH_SHORT"] or 0) + value
+                    elseif text:find("agility") then
+                        stats["ITEM_MOD_AGILITY_SHORT"] = (stats["ITEM_MOD_AGILITY_SHORT"] or 0) + value
+                    elseif text:find("intellect") then
+                        stats["ITEM_MOD_INTELLECT_SHORT"] = (stats["ITEM_MOD_INTELLECT_SHORT"] or 0) + value
+                    elseif text:find("stamina") then
+                        stats["ITEM_MOD_STAMINA_SHORT"] = (stats["ITEM_MOD_STAMINA_SHORT"] or 0) + value
+                    elseif text:find("spell power") then
+                        stats["ITEM_MOD_SPELL_POWER_SHORT"] = (stats["ITEM_MOD_SPELL_POWER_SHORT"] or 0) + value
+                    elseif text:find("critical") then
+                        stats["ITEM_MOD_CRIT_RATING_SHORT"] = (stats["ITEM_MOD_CRIT_RATING_SHORT"] or 0) + value
+                    elseif text:find("haste") then
+                        stats["ITEM_MOD_HASTE_RATING_SHORT"] = (stats["ITEM_MOD_HASTE_RATING_SHORT"] or 0) + value
+                    end
+                end
+            end
+        end
+    end
+
     if not stats then return 0 end
 
     local itemInfo = { GetItemInfo(link) }
@@ -754,7 +726,9 @@ function M:GetItemScore(link)
     if IsProfessionTool(link) then return 0 end
     if self.db.specFilter and not self:IsItemValidForSpec(link) then return 0 end
 
-    local weights = self:GetAdaptiveWeights()
+    -- ✅ FIX: use SPEC weights (not adaptive)
+    local weights = self:GetSpecWeights()
+
     local score = 0
 
     for stat, val in pairs(stats) do
@@ -767,6 +741,41 @@ function M:GetItemScore(link)
         elseif stat:find("HIT") then score = score + val * (weights.HIT or 0)
         end
     end
+
+	--============================================================
+	-- 🔥 FIXED DPS DETECTION (ROBUST)
+	--============================================================
+	if equipLoc == "INVTYPE_WEAPON"
+	or equipLoc == "INVTYPE_2HWEAPON"
+	or equipLoc == "INVTYPE_WEAPONMAINHAND"
+	or equipLoc == "INVTYPE_WEAPONOFFHAND" then
+
+		local dps = nil
+
+		scanTip:ClearLines()
+		scanTip:SetHyperlink(link)
+
+		for i = 1, scanTip:NumLines() do
+			local line = _G["BasicUIItemScoreScannerTextLeft"..i]
+			if line then
+				local text = line:GetText()
+				if text then
+					text = text:lower()
+
+					-- 🔥 MUCH STRONGER MATCH
+					local found = text:match("(%d+%.?%d*)%s*damage per second")
+					if found then
+						dps = tonumber(found)
+						break
+					end
+				end
+			end
+		end
+
+		if dps then
+			score = score + dps * (weights.WEAPON_DPS or 0)
+		end
+	end
 
     -- 👑 Heirloom fix
     if self.db.enableHeirloomScaling and quality == 7 and UnitLevel("player") < 60 then
@@ -975,7 +984,7 @@ local function AddTooltip(tooltip)
     end
 
     -- normal display
-    if result > -2 and result < 2 then result = 0 end
+    if result > -0.5 and result < 0.5 then result = 0 end
 
     if result == 0 then
         tooltip:AddLine("|cffffff00Equal to current gear|r")

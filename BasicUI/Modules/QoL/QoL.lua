@@ -32,28 +32,28 @@ M.defaults = {
 
     enabled = true,
 
-    enableAutomation   	= true,
-    enableAutoGreed    	= true,
-    enableAltBuy       	= true,
+    enableAutomation       = true,
+    enableAutoGreed        = true,
+    enableAltBuy           = true,
 
-    enableMinimap      	= true,
-    enableTradeSkill   	= true,
+    enableMinimap          = true,
+    enableTradeSkill       = true,
 
-    enableNotifications = true,
+    enableNotifications    = true,
 
-    enableMapCoords    	= true,
-	enableWorldMapFog 	= true,
-    showPlayerCoords   	= true,
-    showCursorCoords   	= true,
+    enableMapCoords        = true,
+    enableWorldMapFog      = true,
+    showPlayerCoords       = true,
+    showCursorCoords       = true,
 
     enableZoneTextMove      = true,
     enableZoneTextAnimation = true,
     enableAlertMove         = true,
     enableLootMove          = true,
     enableLargeLootIcons    = true,
-	
-	enableFlashingNodes    = true,
-	flashInterval          = 1.0,
+
+    enableFlashingNodes    = true,
+    flashInterval          = 1.0,
 }
 
 --============================================================
@@ -65,11 +65,9 @@ function M:OnEnable()
     if not self.db.enabled then return end
 
     for name, module in pairs(self.modules) do
-
         if module.OnEnable then
             pcall(module.OnEnable, module, self)
         end
-
     end
 
 end
@@ -79,11 +77,9 @@ end
 function M:OnDisable()
 
     for name, module in pairs(self.modules) do
-
         if module.OnDisable then
             pcall(module.OnDisable, module, self)
         end
-
     end
 
 end
@@ -101,11 +97,18 @@ function M:ApplySettings()
 
     for name, module in pairs(self.modules) do
 
-        if module.ApplySettings then
-            pcall(module.ApplySettings, module, self)
+        local settingKey = "enable" .. name
 
-        elseif module.OnEnable then
-            pcall(module.OnEnable, module, self)
+        if self.db[settingKey] == false then
+            if module.OnDisable then
+                pcall(module.OnDisable, module, self)
+            end
+        else
+            if module.ApplySettings then
+                pcall(module.ApplySettings, module, self)
+            elseif module.OnEnable then
+                pcall(module.OnEnable, module, self)
+            end
         end
 
     end
@@ -215,7 +218,7 @@ M.options = {
                         BasicUI:RefreshModule(M)
                     end,
                 },
-				
+
                 enableTradeSkill = {
                     type = "toggle",
                     name = "Enable Trade Skill Enhancements",
@@ -227,35 +230,35 @@ M.options = {
                         M.db.enableTradeSkill = v
                         BasicUI:RefreshModule(M)
                     end,
-                },				
-				
-				enableFlashingNodes = {
-					type = "toggle",
-					name = "Flashing Minimap Nodes",
-					desc = "Makes gathering nodes flash on the minimap.",
-					order = 3,
+                },
 
-					get = function() return M.db.enableFlashingNodes end,
-					set = function(_, v)
-						M.db.enableFlashingNodes = v
-						BasicUI:RefreshModule(M)
-					end,
-				},
+                enableFlashingNodes = {
+                    type = "toggle",
+                    name = "Flashing Minimap Nodes",
+                    desc = "Makes gathering nodes flash on the minimap.",
+                    order = 3,
 
-				flashInterval = {
-					type = "range",
-					name = "Node Flash Speed",
-					desc = "Adjust how fast minimap nodes flash.",
-					order = 4,
-					min = 0.1,
-					max = 1,
-					step = 0.05,
+                    get = function() return M.db.enableFlashingNodes end,
+                    set = function(_, v)
+                        M.db.enableFlashingNodes = v
+                        BasicUI:RefreshModule(M)
+                    end,
+                },
 
-					get = function() return M.db.flashInterval end,
-					set = function(_, v)
-						M.db.flashInterval = v
-					end,
-				},	
+                flashInterval = {
+                    type = "range",
+                    name = "Node Flash Speed",
+                    desc = "Adjust how fast minimap nodes flash.",
+                    order = 4,
+                    min = 0.1,
+                    max = 1,
+                    step = 0.05,
+
+                    get = function() return M.db.flashInterval end,
+                    set = function(_, v)
+                        M.db.flashInterval = v
+                    end,
+                },
             },
         },
 
@@ -374,25 +377,25 @@ M.options = {
                         BasicUI:RefreshModule(M)
                     end,
                 },
-				
-				enableWorldMapFog = {
-					type = "toggle",
-					name = "Darken Undiscovered Map",
-					desc = "Darkens unexplored areas of the world map for better visibility.",
 
-					get = function() return M.db.enableWorldMapFog end,
-					set = function(_, v)
-						M.db.enableWorldMapFog = v
-						BasicUI:RefreshModule(M)
-					end,
-				},
+                enableWorldMapFog = {
+                    type = "toggle",
+                    name = "Darken Undiscovered Map",
+                    desc = "Darkens unexplored areas of the world map for better visibility.",
+
+                    get = function() return M.db.enableWorldMapFog end,
+                    set = function(_, v)
+                        M.db.enableWorldMapFog = v
+                        BasicUI:RefreshModule(M)
+                    end,
+                },
 
                 showPlayerCoords = {
                     type = "toggle",
                     name = "Show Player Coordinates",
                     desc = "Display your character's current map coordinates.",
-					
-					get = function() return M.db.showPlayerCoords end,
+
+                    get = function() return M.db.showPlayerCoords end,
                     set = function(_, v)
                         M.db.showPlayerCoords = v
                         BasicUI:RefreshModule(M)

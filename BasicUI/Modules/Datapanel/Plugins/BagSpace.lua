@@ -209,8 +209,15 @@ end
 -- Tooltip (Classic Layout)
 --============================================================
 local function ShowTooltip(self)
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:ClearLines()
+	local Datapanel = BasicUI:GetModule("Datapanel")
+
+	if Datapanel and Datapanel.AnchorTooltip then
+		Datapanel:AnchorTooltip(GameTooltip, self)
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+	end
+
+	GameTooltip:ClearLines()
 
     local playerName = UnitName("player")
     local realm = GetRealmName()

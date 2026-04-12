@@ -150,8 +150,6 @@ BasicUI_QoL_RegisterModule("AutoGreed", {
 
     OnEnable = function(self, M)
 
-        if not M.db.enableAutoGreed then return end
-
         if not self.frame then
             self.frame = CreateFrame("Frame")
         end

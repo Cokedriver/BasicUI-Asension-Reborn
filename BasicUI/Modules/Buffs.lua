@@ -78,10 +78,34 @@ local function RestoreBlizzardBuffs()
         end
     end
 
+    RefreshBuffLayout()
+
+end
+
+local function RefreshBuffLayout()
+
     if BuffFrame_Update then
         BuffFrame_Update()
     end
 
+    local Datapanel = BasicUI.GetModule and BasicUI:GetModule("Datapanel")
+    if Datapanel
+        and Datapanel.db
+        and Datapanel.db.enabled
+        and Datapanel.ApplyAuraAnchors
+    then
+        C_Timer.After(0, function()
+            if Datapanel then
+                Datapanel:ApplyAuraAnchors()
+            end
+        end)
+
+        C_Timer.After(0.05, function()
+            if Datapanel then
+                Datapanel:ApplyAuraAnchors()
+            end
+        end)
+    end
 end
 
 --============================================================
@@ -208,6 +232,7 @@ function M:OnEnable()
 
     SetupHooks(self)
     ApplyAllBuffStyling(self)
+    RefreshBuffLayout()
 
     local f = CreateFrame("Frame")
 
@@ -219,6 +244,7 @@ function M:OnEnable()
         if event == "ADDON_LOADED" and addon ~= "BasicUI" then return end
 
         ApplyAllBuffStyling(self)
+        RefreshBuffLayout()
 
     end)
 
@@ -293,9 +319,7 @@ local function RestoreDefaultBuffs()
     ------------------------------------------------
     -- Force Blizzard refresh
     ------------------------------------------------
-    if BuffFrame_Update then
-        BuffFrame_Update()
-    end
+    RefreshBuffLayout()
 
 end
 
@@ -348,9 +372,7 @@ M.options = {
                 M.db.scale = v
                 ApplyBuffFrameScaling(v)
 
-                if BuffFrame_Update then
-                    BuffFrame_Update()
-                end
+                RefreshBuffLayout()
 
             end,
         },
@@ -370,9 +392,7 @@ M.options = {
                 M.db.fontSize = v
                 ApplyAllBuffStyling(M)
 
-                if BuffFrame_Update then
-                    BuffFrame_Update()
-                end
+                RefreshBuffLayout()
 
             end,
         },

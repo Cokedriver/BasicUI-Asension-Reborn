@@ -94,9 +94,20 @@ function Plugin:Refresh()
 
     end
 
-    self.frame.text:SetText(
-        string.format("|cff%sDurability:|r %s", classHex, display)
-    )
+	local compact = false
+
+	if Datapanel and Datapanel.db then
+		compact =
+			Datapanel.db.position ~= "top"
+			and Datapanel.db.gryphons
+			and Datapanel.db.gryphons.enabled == false
+	end
+
+	local label = compact and "Dur" or "Durability"
+
+	self.frame.text:SetText(
+		string.format("|cff%s%s:|r %s", classHex, label, display)
+	)
 
     self.frame:SetWidth(self.frame.text:GetStringWidth() + 12)
 
@@ -107,8 +118,15 @@ end
 --============================================================
 local function ShowTooltip(self)
 
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:ClearLines()
+	local Datapanel = BasicUI:GetModule("Datapanel")
+
+	if Datapanel and Datapanel.AnchorTooltip then
+		Datapanel:AnchorTooltip(GameTooltip, self)
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+	end
+
+	GameTooltip:ClearLines()
 
     -- Average item level calculation
     local slots = {
